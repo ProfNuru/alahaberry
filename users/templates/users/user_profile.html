@@ -1,0 +1,87 @@
+{% extends 'users/staff_base.html' %}
+{% load auth_extras %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block CSS %}
+	<link rel="stylesheet" type="text/css" href="{% static 'users/css/seller_profile.css' %}">
+{% endblock CSS %}
+
+
+{% block maincontent %}
+{% if user|has_group:"sellers" %}
+  <div style="margin-left: 30px">
+      <h2 style="color:aliceblue">Set a Unique and Catchy Business Name in 'Edit Shop Profile'</h2>
+      <h5 style="color:aliceblue">Direct Customers to your Online Shop with your Shop URL (Will only Show when you are Subscribed)</h5>
+      <h5 style="color:aliceblue">Upload a photo or an avatar for your Shop in 'Edit Shop Profile'</h5>
+      <h5 style="color:aliceblue">Set an active Phone number and/or Email address in 'Edit Shop Profile'</h5>
+      <h5 style="color:aliceblue">Handle your item orders by checking the 'handle Orders' checkbox in 'Edit Shop Profile'. This will only apply if you are subscribed</h5>
+  </div>
+{% endif %}
+<div class="row">
+  <div class="col-md-12">
+    <div class="bg-mattBlackLight my-2 p-3">                  
+      <h4 class="text-center"><span class="labels">Username:</span> <span style="color:aliceblue">{{ user.username }}</span></h4>
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+      <div class="profile-card">
+      	<div class="profile-img">
+      		<img src="{{ user.profile.image.url }}">
+      	</div>
+      	<div class="profile-info">
+      		{% if user|has_group:"clerks" %}
+      			<h5><span class="labels">Email:</span> {{ user.email }}</h5>
+      			<h6><span class="labels">Phone number:</span> {{ user.profile.phone_number }}</h6>
+      		{% else %}
+      			<h4><span class="labels">Business name:</span> {{ user.profile.business_name }}</h4>
+            {% if user|has_group:"sellers" %}
+              {% if subbed %}
+                <h5><span class="labels">Shop URL:</span> <a href="{% url 'shops' request.user.id request.user.username %}">alahaberry.com{% url 'shops' request.user.id request.user.username %}</a></h5>
+              {% endif %}
+            {% endif %}
+        		<h5><span class="labels">Email:</span> {{ user.email }}</h5>
+        		<h6><span class="labels">Phone number:</span> {{ user.profile.phone_number }}</h6>
+      		{% endif %}
+          {% if user|has_group:"sellers" %}
+            <button type="button" class="btn btn-outline-primary"  data-toggle="modal" data-target="#editProfileModal"><i class="fas fa-edit"></i> Edit Shop Profile</button>
+          {% else %}
+            <button type="button" class="btn btn-outline-primary"  data-toggle="modal" data-target="#editProfileModal"><i class="fas fa-edit"></i> Edit Profile</button>
+          {% endif %}
+      	</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="editProfileForm" method="POST" action="{% url 'profile-page' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body">
+          <fieldset>
+            {{ u_form | crispy }}
+            {{ p_form | crispy }}
+          </fieldset>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+{% endblock maincontent %}

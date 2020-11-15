@@ -1,0 +1,47 @@
+{% extends 'alaha_market/home_base.html' %}
+{% load static %}
+
+{% block CSS %}
+  <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/category_page.css' %}">
+{% endblock CSS %}
+
+{% block maincontent %}
+  <section id="categoryWrapper">
+      <div class="category-landing-page row">
+        <div class="category-title col-xl-10 col-md-10 col-sm-10 mr-auto">
+          <h1>Alahaberry Online Shops</h1>
+        </div>
+      </div>
+
+      <!-- Category products -->
+      <div id="category-products">
+        <h1>Alahaberry Shops</h1>
+        <h6>Showing {{num_of_sellers}} shops</h6>
+        <div class="line-design"></div>
+        <div class="row product_grid">
+          {% for seller in sellers %}
+          <div class="card col-xl-3 col-md-3 col-sm-6">
+            <img loading="lazy" src="{% if seller.profile.image %} 
+              {{ seller.profile.image.url }} 
+            {% endif %}">
+            <div class="card-body">
+              <h5 style="text-align: center">
+                {% if seller.profile.business_name != 'NA' %}
+                  {{ seller.profile.business_name }}
+                {% else %}
+                  {{ seller.username }}
+                {% endif %}
+              </h5>
+              <a href="{% url 'shops' seller.id seller.username %}" class="btn btn-danger">SHOP NOW</a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      <!-- ./Category products -->
+  </section>
+{% endblock maincontent %}
+
+{% block JS %}
+  <script src="{% static 'alaha_market/js/category_page.js' %}"></script>
+{% endblock JS %}

@@ -1,0 +1,170 @@
+{% extends 'users/staff_base.html' %}
+{% load auth_extras %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block CSS %}
+  <link rel="stylesheet" type="text/css" href="{% static 'users/css/staff_dashboard.css' %}">
+{% endblock CSS %}
+
+
+{% block maincontent %}
+  <div class="row">
+    <div class="col-md-4 my-3">
+      <div class="bg-mattBlackLight px-3 py-3">
+        <h4 class="mb-2"><i class="fas fa-store"></i> Sellers</h4>
+        <div class="progress">
+          <div
+            class="progress-bar bg-warning text-mattBlackDark"
+            role="progressbar"
+            aria-valuenow="100"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            {{ sellers | length }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 my-3">
+      <div class="bg-mattBlackLight px-3 py-3">
+        <h4 class="mb-2"><i class="fas fa-database"></i> Items</h4>
+        <div class="progress">
+          <div
+            class="progress-bar bg-info text-mattBlackDark"
+            role="progressbar"
+            aria-valuenow="100"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            {{ products|length }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 my-3">
+      <div class="bg-mattBlackLight p-3">
+        <h4 class="mb-2"><i class="fas fa-truck"></i> Deliveries</h4>
+        <div class="progress">
+          <div
+            class="progress-bar bg-success"
+            role="progressbar"
+            aria-valuenow="100"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            {{delivered_orders|length}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-8">
+      <div class="bg-mattBlackLight my-2 p-3">      
+        <h4 class="text-center">Items in stock</h4>
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+        <div class="manage-items">
+          <input type="text" name="filter" id="filter-items" class="form-control" placeholder="Filter Items">
+          {% if user|has_group:"admins" %}
+            <button onclick='window.location.href="/staff_dashboard/add_product/"' class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Add Item</button>
+          {% endif %}
+        </div>
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-list-ol"></i></th>
+              <th><i class="fas fa-database"></i> Item</th>
+              <th>Seller</th>
+              <th><i class="fas fa-dollar-sign"></i>GHC Price</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if products|length <= 0 %}
+              <tr>
+                <td style="text-align:center;font-style:italic;color:darkred;font-size:16px" colspan="5">No Items to show</td>
+              </tr>
+            {% else %}
+              {% for product in products %}
+                <tr>
+                  <td>{{ product.product_uid }}</td>
+                  <td>{{ product.product_name }}</td>
+                  <td><a href="{% url 'seller-profile' product.seller.username %}">{{ product.seller.username }}</a></td>
+                  <td>{{ product.product_price }}</td>
+                  <td class="text-center">
+                    <a href="{% url 'admin-item-edit' product.id %}" class="btn btn-primary" style="padding:1px 5px"><i class="fas fa-edit"></i></a>
+                    {% if user|has_group:"admins" %}
+                      <a href="{% url 'admin-item-delete' product.id %}" class="btn btn-danger" style="padding:1px 5px"><i class="fas fa-trash-alt"></i></a>
+                    {% endif %}
+                    <a href="{% url 'view-product' product.id product.product_name %}" class="btn btn-info" style="padding:1px 5px"><i class="fas fa-eye"></i></a>
+                    <a href="{% url 'add-product-damage' product.id %}" class="btn btn-warning" style="padding:1px 10px"><i class="fas fa-exclamation" style="color:red"></i></a>
+                  </td>
+                </tr>
+              {% endfor %}
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="bg-mattBlackLight my-2 p-3">
+        <h4 class="text-center">Item Categories</h4>
+        <div class="manage-orders">
+          <input type="text" name="filter" id="filter-categories" class="form-control" placeholder="Filter Orders">
+          <button onclick="window.location.href='/products/categories/add_category/'" class="btn btn-secondary">Add Category</button>
+        </div>
+        <table class="categories-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for category in categories %}
+            <tr>
+              <td><a href="{% url 'category-detail' category.id %}">{{category.category_name}}</a></td>
+              <td><a href="{% url 'update-category' category.id %}" class="btn btn-primary" style="padding:1px 5px"><i class="fas fa-edit"></i></a> <a href="{% url 'delete-category' category.id %}" class="btn btn-danger" style="padding:1px 5px"><i class="fas fa-trash-alt"></i></a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+ 	</div>
+<!-- Add Item Modal 
+<div class="modal fade" id="adminAddItemModal" tabindex="-1" role="dialog" aria-labelledby="adminAddItemModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="adminAddItemModalLabel">Add Item</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="adminAddItem" method="POST" action="#">
+        {% csrf_token %}
+        <div class="modal-body">
+          <fieldset>
+            {{ add_seller_form | crispy }}
+          </fieldset>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+-->
+{% endblock maincontent %}
+
+{% block JS %}
+  <script src="{% static 'users/js/staff_dashboard.js' %}"></script>
+{% endblock JS %}

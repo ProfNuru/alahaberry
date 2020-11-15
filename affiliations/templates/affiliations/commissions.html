@@ -1,0 +1,66 @@
+{% extends 'users/staff_base.html' %}
+{% load auth_extras %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block maincontent %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="bg-mattBlackLight my-2 p-3">                  
+        <h4 class="text-center">Commisions for {{ coupon.user.username }}</h4>
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+        <div class="manage-items">
+          <a href="{% url 'all-affiliates' %}" class="btn btn-warning"><i class="fas fa-arrow-left"></i> Back</a>
+          <input type="text" name="filter" id="filter-clerks" class="form-control" placeholder="Filter Items">
+          <a href="{% url 'pay-all-commissions' coupon.id %}" class="btn btn-success"><i class="fas fa-money-bill-wave"></i> Pay All</a>
+        </div>
+        <table class="items-table clerks-table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-list-ol"></i></th>
+              <th>Coupon</th>
+              <th>Commission</th>
+              <th>Date Earned</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for commission in commissions %}
+              <tr>
+                <td>{{ commission.id }}</td>
+                <td>{{ commission.coupon.coupon_code }}</td>
+                <td>{{ commission.commission }}</td>
+                <td>{{ commission.date_used }}</td>
+                <td class="text-center">
+                  {% if commission.paid %}
+                    <a style="color:aliceblue;font-style:italic;font-size:14px">Paid</a>
+                  {% else %}
+                    <a href="{% url 'pay-commission' commission.id coupon.id %}" class="btn btn-success" style="padding:1px 5px" title="View Details"><i class="fas fa-checked"></i> Mark as paid</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+ 	</div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="bg-mattBlackLight my-2 p-3"> 
+        <h3>Total Commission: GHC {{ total_unpaid_commission }}</h3>
+      </div>
+    </div>
+  </div>
+
+
+
+{% endblock maincontent %}
+
+{% block JS %}
+  <script src="{% static 'users/js/all_clerks.js' %}"></script>
+{% endblock JS %}

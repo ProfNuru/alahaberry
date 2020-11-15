@@ -1,0 +1,18 @@
+{% extends 'alaha_market/home_base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block CSS %}
+  <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/login.css' %}">
+{% endblock CSS %}
+
+{% block maincontent %}
+	<h4 class="login-form-heading" style="width:70%;margin:20px auto;text-align:center;">Account inactive</h4>
+	  <div class="form_field row">
+	  <div class="col-xl-8 col-md-8 col-sm-12 mr-auto ml-auto">
+	    <h4>This account is currently inactive</h4>
+	  </div>
+	</div>
+	
+{% endblock maincontent %}
+

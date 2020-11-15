@@ -1,0 +1,87 @@
+{% extends 'users/staff_base.html' %}
+{% load auth_extras %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block maincontent %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="bg-mattBlackLight my-2 p-3">                  
+        <h4 class="text-center">Subscription Packages</h4>
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+        <div class="manage-items">
+          <input type="text" name="filter" id="filter-clerks" class="form-control" placeholder="Filter Packages">
+          <button  type="button" data-toggle="modal" data-target="#addSubscriptionPackageModal" class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Add Package</button>
+        </div>
+        <table class="items-table clerks-table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-list-ol"></i></th>
+              <th><i class="fas fa-user"></i> Package Title</th>
+              <th><i class="fas fa-file-signature"></i> Cost Per Month</th>
+              <th><i class="fas fa-file-signature"></i> Details</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for package in all_packages %}
+              <tr>
+                <td>{{ package.id }}</td>
+                <td>{{ package.title }}</td>
+                <td>{{ package.cost_per_month }}</td>
+                <td>{{ package.details }}</td>
+                <td class="text-center">
+                  <a href="{% url 'view-package' package.id %}" class="btn btn-info" style="padding:1px 5px" title="View Details"><i class="fas fa-eye"></i></a>
+                  <a href="{% url 'edit-package' package.id %}" class="btn btn-success" style="padding:1px 5px"><i class="fas fa-edit" title="Edit"></i></a>
+                  <a href="{% url 'delete-package' package.id %}" class="btn btn-danger" style="padding:1px 5px"><i class="fas fa-trash" title="Delete"></i></a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+ 	</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addSubscriptionPackageModal" tabindex="-1" role="dialog" aria-labelledby="addSubscriptionPackageModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addSubscriptionPackageModalLabel">Add New Subscription Package</h5>
+        {% if messages %}
+          {% for message in messages %}
+            <h3>{{ message }}</h3>
+          {% endfor %}
+        {% endif %}
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="adminAddClerkForm" method="POST">
+        {% csrf_token %}
+        <div class="modal-body">
+          <h5 style="color:darkred" class="errorMessages"></h5>
+          <fieldset>
+            {{ sub_package_form | crispy }}
+          </fieldset>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+{% endblock maincontent %}
+
+{% block JS %}
+  <script src="{% static 'users/js/all_clerks.js' %}"></script>
+{% endblock JS %}

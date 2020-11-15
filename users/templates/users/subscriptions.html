@@ -1,0 +1,196 @@
+{% extends 'users/staff_base.html' %}
+
+{% block maincontent %}
+	<div class="row">
+    <div class="col-md-12">
+      <div class="bg-mattBlackLight my-2 p-3">
+        {% if subbed %}
+          <h4 style="margin-top: 40px">Your online store is subscribed till {{ user.profile.subscription_end }}</h4>
+          <h6>Customers requests for your products will appear on your dashboard. Call them and discuss delivery arrangements.</h6>
+          <p><button type="button" data-toggle="modal" data-target="#requestSubscriptionModal" class="btn btn-success" href="#">Update Subscription</button></p>
+        {% else %}
+          <h2 style="color:aliceblue">NOT SUBSCRIBED</h2>
+          <h6>You can publish up to 3 items for sale. However, requests for your products will be handled by Alahaberry Sales Persons who will contact you for the product. Charges apply on each sale.</h6>
+          
+          {% if shop_documents_uploaded %}
+            <p><button type="button" data-toggle="modal" data-target="#requestSubscriptionModal" class="btn btn-danger" href="#">Subscribe NOW</button> to add unlimited number of items</p>
+          {% else %}
+            <h5 style="color:red;font-weight:bolder;font-style:italic">Business Certificate OR Valid ID required. Upload in <a href="{% url 'profile-page' %}">Shop Settings</a></h5>
+          {% endif %}
+
+        {% endif %}
+        <h3>Subscription Packages</h3>
+        {% for package in subscription_packages %}
+          <div class="row">
+            <div class="col-md-3 col-sm-12">
+              <h5>{{package.title}}</h5>
+            </div>
+            <div class="col-md-3 col-sm-12">
+              <p>{{package.details}}</p>
+            </div>
+            <div class="col-md-3 col-sm-12">
+              <h4>GHC {{package.cost_per_month}} per month</h4>
+            </div>
+          </div>
+          <hr>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="bg-mattBlackLight my-2 p-3">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+        {% if subscriptions|length <= 0 %}
+          <h4>You have no subscriptions</h4>
+        {% else %}
+          <h4>Subscription History</h4>
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th><i class="fas fa-list-ol"></i></th>
+                <th><i class="fas fa-file-signature"></i> Subscription Package</th>
+                <th>Months</th>
+                <th>Date Subscribed</th>
+                <th>End Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for subscription in subscriptions %}
+                <tr>
+                  <td>{{ subscription.id }}</td>
+                  <td>{{ subscription.subscription_package.title }}</td>
+                  <td style="text-align: right">{{ subscription.months }}</td>
+                  {% if subscription.paid %}
+                    <td>{{ subscription.date_subscribed }}</td>
+                    <td>{{ subscription.subscription_end }}</td>
+                  {% else %}
+                    <td style="font-style:italic;color:#ccc">Pending</td>
+                    <td style="font-style:italic;color:#ccc">NA</td>
+                  {% endif %}
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>          
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+<!-- Request Subscription Modal -->
+{% if shop_documents_uploaded %}
+  <div class="modal fade" id="requestSubscriptionModal" tabindex="-1" role="dialog" aria-labelledby="requestSubscriptionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="requestSubscriptionModalLabel">Request Subscription</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="adminAddSeller" method="POST">
+          {% csrf_token %}
+          <div class="modal-body">
+            <h3>Subscription Packages</h3>
+            {% for package in subscription_packages %}
+              <div class="row">
+                <div class="col-md-6">
+                  <h5>{{package.title}}</h5>
+                  <p>{{package.details}}</p>
+                </div>
+                <div class="col-md-6">
+                  <h4>GHC {{package.cost_per_month}} per month</h4>
+                </div>
+              </div>
+              <hr>
+            {% endfor %}
+            <fieldset>
+              <h4 class="feedback-msg"></h4>
+              <div class="form-row">
+                <div class="col">
+                  <label for="sub_years">Select Package</label>
+                  <select id="package_id" name="package_id" class="form-control" required>
+                    {% for package in subscription_packages %}
+                      <option value="{{package.id}}">{{package.title}}-GHC <span class="package_costs">{{package.cost_per_month}}</span></option>
+                    {% endfor %}
+                  </select>
+                </div>  
+                <div class="col">
+                  <label for="sub_months">Months</label>
+                  <input type="text" id="sub_months" name="sub_months" class="form-control" placeholder="Enter number of months" required>                
+                </div>
+              </div>
+              
+                <div class="form-row" style="margin-top: 30px">
+                  <div class="col">
+                    <label for="sub_total_cost">Subscription cost</label>
+                    <input type="text" id="sub_total_cost" class="form-control" placeholder="0.00" disabled>         
+                  </div>
+                  {% if user.profile.new_seller %}
+                  <div class="col">
+                    <label for="coupon_code">Have a Coupon?</label>
+                    <input type="text" id="coupon_code" name="coupon_code" class="form-control" placeholder="Enter coupon code">                
+                  </div>
+                  {% endif %}
+                </div>
+            </fieldset>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="submit" class="btn btn-success">Request Subscription</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% endblock maincontent %}
+
+{% block JS %}
+<script type="text/javascript">
+  const packages_list = [
+    {% for package in subscription_packages %}
+      {
+        id: '{{package.id}}',
+        title: '{{package.title}}',
+        details: '{{package.details}}',
+        cost: '{{package.cost_per_month}}'
+      },
+    {% endfor %}
+  ];
+
+  $("#sub_months").on("keyup", updateTotalCost);
+  $("#package_id").on("change", updateTotalCost);
+
+  function updateTotalCost(){
+    let months = $("#sub_months").val();
+    if(isNaN(months)){
+      $(".feedback-msg").text("Invalid input!");
+    }else{
+      $(".feedback-msg").text("");
+      let selected_package_id = $("#package_id").children("option:selected").attr('value');
+      let num_months = parseInt(months);
+      
+      for(var i=0; i<packages_list.length; i++){
+        if(packages_list[i].id == selected_package_id){
+          let total_cost = num_months * parseFloat(packages_list[i].cost);
+          if(!isNaN(total_cost)){
+            $("#sub_total_cost").val(total_cost);
+            console.log(total_cost);
+          }else{
+            $("#sub_total_cost").val("0.00");
+            console.log("Not a number",total_cost);
+          }
+        }
+      }
+    }
+  }
+
+</script>
+{% endblock JS %}
+

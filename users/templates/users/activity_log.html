@@ -1,0 +1,76 @@
+{% extends 'users/staff_base.html' %}
+{% load auth_extras %}
+{% load static %}
+
+
+{% block maincontent %}
+  <div class="row">
+    <div class="col-md-12 my-3">
+      <div class="bg-mattBlackLight px-3 py-3">
+        <h4 class="mb-2"><i class="fas fa-history"></i> Activity Logs</h4>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-8">
+      <div class="bg-mattBlackLight my-2 p-3">                  
+        <h4 class="text-center">Activity History</h4>
+        <div class="manage-items">
+          <input type="text" name="filter" id="filter-items" class="form-control" placeholder="Filter Log">
+        </div>
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-list-ol"></i></th>
+              <th><i class="fas fa-user"></i> Activity</th>
+              <th><i class="fas fa-file-signature"></i> User</th>
+              <th class="text-center">DateTime</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in logs %}
+              <tr>
+                <td>{{ log.id }}</td>
+                <td>{{ log.log }}</td>
+                <td>{{ log.user.username }}</td>
+                <td class="text-center">
+                  {{ log.date_registered }}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="bg-mattBlackLight my-2 p-3">
+        <h4 class="text-center">Latest Activity</h4>
+        <div class="manage-orders">
+          <input type="text" name="filter" id="filter-latest-activity" class="form-control" placeholder="Filter">
+        </div>
+        <table class="new-orders-table">
+          <thead>
+            <tr>
+              <th>Activity</th>
+              <th>User</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in latest_logs %}
+              <tr>
+                <td>{{ log.log }}</td>
+                <td>{{ log.user.username }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+ 	</div>
+
+{% endblock maincontent %}
+
+{% block JS %}
+<script src="{% static 'users/js/staff_dashboard.js' %}"></script>
+<script src="{% static 'users/js/activity_log.js' %}"></script>
+{% endblock JS %}

@@ -1,0 +1,212 @@
+{% extends 'alaha_market/home_base.html' %}
+{% load static %}
+
+{% block CSS %}
+	<link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/homepage.css' %}">
+  <style>
+    .items{
+        display:grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-gap:1em;
+    }
+    .item-card{
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+    .item-card:hover{
+        text-decoration: none;
+    }
+    .img-holder{
+        width:100%;
+        max-height: 200px;
+        overflow:hidden;
+    }
+    .img-holder img{
+        max-width:100%;
+        border-radius: 5px;
+    }
+    .item-details{
+        background-color: aliceblue;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+        padding: 5px 5px;
+    }
+    .item-details p{
+      margin:0;
+    }
+    .item-details p.item-name{
+        color: #333;
+    }
+    .item-details p.item-price{
+        color: #a00;
+    }
+    .item-card span{
+        position: absolute;
+        top: 0;
+    }
+    
+
+    @media only screen and (max-width: 1200px){
+        #items{
+            width:80%;
+        }
+    }
+    @media only screen and (max-width: 1024px){
+        #items{
+            width:90%;
+        }
+    }
+    @media only screen and (max-width: 767px){
+        #items{
+            width:95%;
+        }
+        .items{
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    .ad-div-col1{
+      display:none;
+    }
+    .active-ad{
+      display:block;
+    }
+  </style>
+{% endblock CSS %}
+
+
+{% block maincontent %}
+  <!-- Most Popular -->
+  <div id="most-popular">
+    <h1>MOST POPULAR</h1>
+    <h6>What most people are viewing!</h6>
+    <div class="line-design"></div>
+    <div class="items">
+      {% for product in popular_products %}
+        {% if product.product_thumbnail %}
+          <!--<div class="card col-xl-3 col-md-3 col-sm-6">
+            <img loading="lazy" src="{{ product.product_thumbnail.url }}">
+            <div class="card-body">
+              <h6 class="store_name"><a href="{% url 'shops' product.seller.id product.seller.username %}">
+                {% if product.seller.profile.business_name != 'NA' %}
+                  {{ product.seller.profile.business_name }}
+                {% else %}
+                  {{ product.seller.username }}
+                {% endif %}
+              </a></h6>
+              <h4 class="product_name">{{ product.product_name }}</h4>
+              <a href="{% url 'view-product' product.id product.product_name %}" class="btn btn-danger">BUY NOW</a>
+            </div>
+            {% if product.brand_new %}
+              <span class="new_tag">
+                New
+              </span> 
+            {% else %}
+              <span class="used_tag">
+                Used
+              </span>
+            {% endif %}
+          </div>-->
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <!-- ./Most Popular -->
+
+  <!-- New Arrivals -->
+  <div id="new-arrivals">
+    <h1>ALL LISTINGS</h1>
+    <h6>Latest additions</h6>
+    <div class="line-design"></div>
+    <div class="items">
+      {% for product in products %}
+        {% if product.product_thumbnail %}
+          <a href="{% url 'view-product' product.id product.product_name %}" class="item-card">
+            <div class="img-holder">
+                <img src="{{ product.product_thumbnail.url }}">
+            </div>
+            <div class="item-details">
+                <p class="item-name">{{product.product_name}}</p>
+                <p class="item-price">GHC {{product.product_price}}</p>
+            </div>
+            <span style="color:red;background-color">Brand NEW</span>
+          </a>
+          <!--
+          <div class="card col-xl-3 col-md-3 col-sm-6">
+            <img loading="lazy" src="{{ product.product_thumbnail.url }}">
+            <div class="card-body">
+              <h6 class="store_name"><a href="{% url 'shops' product.seller.id product.seller.username %}">
+                {% if product.seller.profile.business_name != 'NA' %}
+                  {{ product.seller.profile.business_name }}
+                {% else %}
+                  {{ product.seller.username }}
+                {% endif %}
+              </a></h6>
+              <h4 class="product_name">{{ product.product_name }}</h4>
+              <a href="{% url 'view-product' product.id product.product_name %}" class="btn btn-danger">BUY NOW</a>
+            </div>
+            {% if product.brand_new %}
+              <span class="new_tag">
+                New
+              </span> 
+            {% else %}
+              <span class="used_tag">
+                Used
+              </span>
+            {% endif %}
+          </div>-->
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <!-- ./New Arrivals -->
+
+ <!-- Advertisements -->
+  <div class="row-ads row" style="height:350px; position:relative;width:100%">
+    {% for ad in horizontal_ads %}
+      {% if forloop.counter == 1 %}
+        <a href="{{ad.link}}" target="_blank" class="ad-div-col1 active-ad col-xl-12 col-md-12 col-sm-12 mr-auto" style="background-image:url('{% if ad.image %}{{ad.image.url}}{% endif %}');position:absolute;left:50px;
+        background-position:center;background-size:80% 100%;background-repeat:no-repeat;height:300px">
+          {% if ad.media %}
+          <video loading="lazy" width="100%" height="100%" autoplay loop>
+            <source src="{{ad.media.url}}" type="video/mp4">
+          </video>
+          {% endif %}
+        </a>
+      {% else %}
+        <a href="{{ad.link}}" target="_blank" class="ad-div-col1 col-xl-12 col-md-12 col-sm-12 mr-auto" style="background-image:url('{% if ad.image %}{{ad.image.url}}{% endif %}');position:absolute;left:50px;
+        background-position:center;background-size:80% 100%;background-repeat:no-repeat;height:300px">
+          {% if ad.media %}
+            <video loading="lazy" width="100%" height="100%" autoplay loop>
+              <source src="{{ad.media.url}}" type="video/mp4">
+            </video>
+          {% endif %}
+        </a>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <!-- ./Advertisements -->
+
+
+{% endblock maincontent %}
+
+
+{% block JS %}
+  <script src="{% static 'alaha_market/js/homepage.js' %}"></script>
+  <script>
+    
+  setInterval(adSlideShowCol1,5200);
+  
+  //Functions
+  function adSlideShowCol1(){
+      let all_ads = $(".ad-div-col1");
+      if($(".ad-div-col1.active-ad").next().length >= 1){
+        let activeSlide = $(".ad-div-col1.active-ad");
+        activeSlide.next().addClass("active-ad");
+        activeSlide.removeClass("active-ad");        
+      }else{
+        $(".ad-div-col1").removeClass('active-ad');
+        $(".ad-div-col1").first().addClass('active-ad');
+      }
+  }
+  </script>
+{% endblock JS %}

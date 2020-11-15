@@ -1,0 +1,40 @@
+{% extends 'users/staff_base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block CSS %}
+<link rel="stylesheet" type="text/css" href="{% static 'products/css/product_form.css' %}">
+{% endblock CSS %}
+
+{% block maincontent %}
+<div style="margin-left: 30px">
+	<h2 style="color:aliceblue"><i class="fas fa-plus-circle"></i> Edit New Item Fields and Save</h2>
+	<h5 style="color:aliceblue">Include Brand name, version number etc in your Product name to make searching for it easier</h5>	
+	<h5 style="color:aliceblue">Describe the item fully in Product Description</h5>
+	<h5 style="color:aliceblue">Be Sure to Uncheck the 'Brand new' button if Item is Used.</h5>
+	<h5 style="color:aliceblue">Mention Packaging and inclusions in Product Details</h5>
+	<h5 style="color:aliceblue">The Hash tags field is for searching purpose. Include as many relevant tags as possible</h5>
+</div>
+<div class="row">
+    <div class="col-md-12">
+      	<div class="bg-mattBlackLight my-2 p-3">  
+		  	<form id="sellerAddItemForm" method="POST" enctype="multipart/form-data">
+				{% csrf_token %}
+				<fieldset class="form-group">
+					{{ form|crispy }}
+				</fieldset>
+		    	<div class="form-group">
+		    		<button type="submit" class="btn btn-success" id="submit_add_item">Save</button>
+		    		<a href="{% url 'user-dashboard' %}" class="btn btn-danger">Cancel</a>
+		    	</div>
+		  	</form>
+		</div>
+	</div>
+</div>
+{% endblock maincontent %}
+
+
+{% block JS %}
+	
+{% endblock JS %}
+

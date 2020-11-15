@@ -1,0 +1,8 @@
+.form_field{
+	margin-top: 45px;
+}
+.form_field form{
+	border: 1px solid #aaa;
+	border-radius: 5px;
+	padding: 10px 20px;
+}

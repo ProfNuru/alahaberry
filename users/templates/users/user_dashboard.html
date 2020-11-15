@@ -1,0 +1,269 @@
+{% extends 'users/staff_base.html' %}
+{% load static %}
+{% load mathfilters %}
+
+
+{% block CSS %}
+	<link rel="stylesheet" type="text/css" href="{% static 'users/css/user_dashboard.css' %}">
+{% endblock CSS %}
+
+
+{% block maincontent %}
+	<div style="margin-left: 30px">
+		{% if subbed %}
+			<h2 style="color:aliceblue">Welcome to Your Online Shop</h2>
+			<h5 style="color:aliceblue">All Item Orders will be handled by Alahaberry Sales Person</h5>
+			<h5 style="color:aliceblue">To handle your own Item Orders, Go to Your Shop Settings and Check 'Handle Orders and Deliveries'</h5>
+		{% else %}
+			<h2 style="color:aliceblue">Welcome to Your Shop Dashboard</h2>
+			<h5 style="color:aliceblue">You NOT subscribed. You can add only 3 items onto Alahaberry!</h5>
+			<h5 style="color:aliceblue">All requests to buy your item will be handled by Alahaberry Sales Persons. Charges Apply on each Successful Sale!</h5>
+			<h5 style="color:aliceblue">Be sure to provide accurate contact information in your Online Shop settings. Click on your Username in the top right corner and Go to the 'Online Shop Settings' and 'Edit Shop Profile'</h5>
+			<h5 style="color:aliceblue">Go to the 'Subscriptions' Tab and Subscribe to own your Shop</h5>
+		{% endif %}
+	</div>
+	<div class="row">
+	    <div class="col-md-6 my-3">
+	      <div class="bg-mattBlackLight px-3 py-3">
+	        <h4 class="mb-2"><i class="fas fa-database"></i> Items</h4>
+	        <div class="progress">
+	          <div
+	            class="progress-bar bg-info text-mattBlackDark"
+	            role="progressbar"
+	            aria-valuenow="100"
+	            aria-valuemin="0"
+	            aria-valuemax="100"
+	          >
+	            {{ products|length }}
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	    <div class="col-md-6 my-3">
+	      <div class="bg-mattBlackLight px-3 py-3">
+	        <h4 class="mb-2"><i class="fas fa-file-signature"></i> Subscriptions</h4>
+	        <div class="progress">
+	          <div
+	            class="progress-bar bg-info text-mattBlackDark"
+	            role="progressbar"
+	            aria-valuenow="25"
+	            aria-valuemin="0"
+	            aria-valuemax="100"
+	          >
+	            {{subscriptions|length}}
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	</div>
+
+	<div class="row">
+		{% if subbed %}
+			<div class="col-md-8">
+		      <div class="bg-mattBlackLight my-2 p-3">                  
+		        <h4 class="text-center">Items in stock</h4>
+		        {% if messages %}
+		          {% for message in messages %}
+		            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+		          {% endfor %}
+		        {% endif %}
+		        <div class="manage-items">
+		          <input type="text" name="filter" id="filter-items" class="form-control" placeholder="Filter Items">
+		          <button onclick='window.location.href="/user_dashboard/add_product/"' class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Add Item</button>
+
+		        </div>
+		        <table class="items-table">
+		          <thead>
+		            <tr>
+		              <th>#</th>
+		              <th><i class="fas fa-database"></i> Item</th>
+		              <th>Quality</th>
+		              <th><i class="fas fa-dollar-sign"></i>GHC Price</th>
+		              <th>Views</th>
+		              <th class="text-center">Action</th>
+		            </tr>
+		          </thead>
+		          <tbody>
+		          	{% if products.count <= 0 %}
+		          		<tr>
+		          			<td style="text-align:center;font-style:italic;color:darkred;font-size:16px" colspan="5">No Items to show</td>
+		          		</tr>
+		          	{% else %}
+			          	{% for product in products %}
+			          		<tr>
+				              <td>{{ product.product_uid }}</td>
+				              <td>{{ product.product_name }}</td>
+				              {% if product.brand_new %}
+				              	<td style="background-color: #003300;color:aliceblue">Brand New</td>
+				              {% else %}
+				              	<td style="background-color: #aaa;color:#111">Used</td>
+				              {% endif %}
+				              <td>{{ product.product_price }}</td>
+				              <td>{{ product.product_hit.views }}</td>
+				              <td class="text-center">
+				                <a href="{% url 'update-product' product.id %}" class="btn btn-primary" style="padding:1px 5px" title="Edit Item"><i class="fas fa-edit"></i></a>
+				                <a href="{% url 'delete-product' product.id %}" class="btn btn-danger" style="padding:1px 5px"><i class="fas fa-trash-alt"></i></a>
+				                <a href="{% url 'view-product' product.id product.product_name %}" class="btn btn-info" style="padding:1px 5px"><i class="fas fa-eye"></i></a>
+				                <a href="{% url 'add-product-damage' product.id %}" class="btn btn-warning" style="padding:1px 10px"><i class="fas fa-exclamation" style="color:red"></i></a>
+				              </td>
+				            </tr>
+			          	{% endfor %}
+		          	{% endif %}
+		          </tbody>
+		        </table>
+		      </div>
+		    </div>
+		    <div class="col-md-4">
+		      <div class="bg-mattBlackLight my-2 p-3">
+		        <h4 class="text-center">Pending Orders</h4>
+		        <table class="new-orders-table">
+		          <thead>
+		            <tr>
+		              <th>Item</th>
+		              <th>Customer Contact</th>
+		              <th>View</th>
+		            </tr>
+		          </thead>
+		          <tbody>
+		            {% for order in orders %}
+		            <tr>
+		              <td><a href="{% url 'view-product' order.product.id order.product.product_name %}">{{order.product.product_name}}</a></td>
+		              <td>{{order.phone}}</td>
+		              <td><button class="btn btn-info" style="padding:1px 5px" data-toggle="modal" data-target="#viewOrderModal{{order.id}}"><i class="fas fa-eye"></i></button></td>
+		            </tr>
+		            <!-- View Order modal -->
+		            <!-- Modal -->
+		            <div class="modal fade" id="viewOrderModal{{order.id}}" tabindex="-1" role="dialog" aria-labelledby="viewOrderModal{{order.id}}Label" aria-hidden="true">
+		                <div class="modal-dialog">
+		                  <div class="modal-content">
+		                    <div class="modal-header">
+		                      <h5 class="modal-title" id="viewOrderModal{{order.id}}Label">Order details</h5>
+		                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+		                        <span aria-hidden="true">&times;</span>
+		                      </button>
+		                    </div>
+		                    <div class="modal-body">
+		                    	<h3>Order for Item #{{order.product.product_uid}}</h3>
+		                    	<div class="ordered_item_details">
+		                    		<div class="ordered_item_img">
+		                    			{% if order.product.product_thumbnail %}
+		                    				<img src="{{order.product.product_thumbnail.url}}" alt="Item thumbnail">
+		                    			{% endif %}
+		                    		</div>
+		                    		<div class="ordered_item_desc">
+		                    			<h4>{{order.product.product_name}}</h4>
+		                    			<p>Description: <br>{{order.product.product_desc}}</p>
+		                    			{% if order.product.product_details %}
+		                    				<p>Details: <br>{{order.product.product_details}}</p>
+		                    			{% endif %}
+		                    		</div>	                    		
+		                    	</div>
+		                    	<div class="customer_details">
+		                    		<h3>Order Details</h3>
+		                    		<h4>Ordered on: {{order.date_ordered}}</h4>
+		                    		<h5>Name: {{order.name}}</h5>
+		                    		<h5>Contact: {{order.phone}}</h5>
+		                    		<h5>E-mail: {{order.email}}</h5>
+		                    		<h6>Order message:</h6>
+		                    		<p>{{order.order}}</p>
+		                    	</div>
+		                    	{% if user.profile.handle_orders %}
+			                    <form method="POST" action="{% url 'deliver-order' %}">
+			                        {% csrf_token %}
+			                        <fieldset>
+			                        	<legend>Deliver Item</legend>
+			                        	<h6>Contact the customer and make delivery arrangements. When You have delivered the item, please click 'Item Delivered' below</h6>
+			                        	<input type="hidden" name="order_id" value="{{order.id}}">
+			                        	<button type="submit" class="btn btn-success" style="padding:1px 5px"><i class="fas fa-check-double"></i> Item delievered</button>
+			                        </fieldset>
+			                    </form>
+			                    {% else %}
+			                    	<div class="customer_details">
+			                    		<h6>Order will be handled by Alahaberry Sales person. To handle Orders by yourself, change this setting in your Shop Settings</h6>
+			                    	</div>
+			                    {% endif %}
+		                    </div>
+		                    <div class="modal-footer">
+		                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+		                  </div>
+		                </div>
+		            </div>
+		            <!-- ./View Order modal -->
+		            {% endfor %}
+		          </tbody>
+		        </table>
+		      </div>
+		    </div>
+		{% else %}
+		    <div class="col-md-12">
+		      <div class="bg-mattBlackLight my-2 p-3">                  
+		        <h4 class="text-center">Items in stock</h4>
+		        {% if messages %}
+		          {% for message in messages %}
+		            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+		          {% endfor %}
+		        {% endif %}
+		        <div class="manage-items">
+		          <input type="text" name="filter" id="filter-items" class="form-control" placeholder="Filter Items">
+		          {% if products.count < 3 %}
+		          	<button onclick='window.location.href="/user_dashboard/add_product/"' class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Add Item</button>
+		          {% endif %}
+
+		        </div>
+		        <table class="items-table">
+		          <thead>
+		            <tr>
+		              <th>#</th>
+		              <th><i class="fas fa-database"></i> Item</th>
+		              <th>Quality</th>
+		              <th><i class="fas fa-dollar-sign"></i>GHC Price</th>
+		              <th>Charge on Item</th>
+		              <th class="text-center">Action</th>
+		            </tr>
+		          </thead>
+		          <tbody>
+		          	{% if products|length <= 0 %}
+		          		<tr>
+		          			<td style="text-align:center;font-style:italic;color:darkred;font-size:16px" colspan="6">No Items to show</td>
+		          		</tr>
+		          	{% else %}
+			          	{% for product in products %}
+			          		<tr>
+				              <td>{{ product.product_uid }}</td>
+				              <td>{{ product.product_name }}</td>
+				              {% if product.brand_new %}
+				              	<td style="background-color: #003300;color:aliceblue">Brand New</td>
+				              {% else %}
+				              	<td style="background-color: #aaa;color:#111">Used</td>
+				              {% endif %}
+				              <td>{{ product.product_price }}</td>
+				              <td class="item_charges">{{ product.product_price|mul:app_setting.charges_on_sale }}</td>
+				              <td class="text-center">
+				                <a href="{% url 'update-product' product.id %}" class="btn btn-primary" style="padding:1px 5px"><i class="fas fa-edit"></i></a>
+				                <a href="{% url 'delete-product' product.id %}" class="btn btn-danger" style="padding:1px 5px"><i class="fas fa-trash-alt"></i></a>
+				                <a href="{% url 'view-product' product.id product.product_name %}" class="btn btn-info" style="padding:1px 5px"><i class="fas fa-eye"></i></a>
+				                <a href="{% url 'add-product-damage' product.id %}" class="btn btn-warning" style="padding:1px 10px"><i class="fas fa-exclamation" style="color:red"></i></a>
+				              </td>
+				            </tr>
+			          	{% endfor %}
+		          	{% endif %}
+		          </tbody>
+		        </table>
+		      </div>
+		    </div>
+	    {% endif %}
+	</div>
+{% endblock maincontent %}
+
+
+{% block JS %}
+	<script src="{% static 'users/js/user_dashboard.js' %}"></script>
+	<script>
+		let item_charges = $(".items-table .item_charges");
+		for(var i=0; i<item_charges.length; i++){
+			let charges = parseFloat(item_charges[i].innerText)
+			item_charges[i].innerText = Math.floor(charges).toFixed(2);
+		}
+	</script>
+{% endblock JS %}
+

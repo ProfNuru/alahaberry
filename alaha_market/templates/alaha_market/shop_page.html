@@ -1,0 +1,61 @@
+{% extends 'alaha_market/home_base.html' %}
+{% load static %}
+
+{% block CSS %}
+  <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/category_page.css' %}">
+{% endblock CSS %}
+
+{% block maincontent %}
+  <section id="categoryWrapper">
+      <div class="category-landing-page row">
+          <div class="category-title col-xl-7 col-md-7 col-sm-7 mr-auto">
+              <h1>Welcome to {{ shop_name }}</h1>
+              <p>{{ shop.business_description }}</p>
+          </div>
+          <div class="category-banner col-xl-3 col-md-3 col-sm-3 ml-auto">
+              <img loading="lazy" src="{{ shop.image.url }}">
+          </div>
+      </div>
+
+      <!-- Category products -->
+      <div id="category-products">
+        <h1>Items sold here</h1>
+        <h6>Latest additions</h6>
+        <div class="line-design"></div>
+        <div class="row product_grid">
+          {% for product in products %}
+            {% if product.product_thumbnail %}
+              <div class="card col-xl-3 col-md-3 col-sm-6">
+                <img loading="lazy" src="{{ product.product_thumbnail.url }}">
+                <div class="card-body">
+                  <h6 class="store_name"><a href="#">
+                    {% if product.seller.profile.business_name != 'NA' %}
+                      {{ product.seller.profile.business_name }}
+                    {% else %}
+                      {{ product.seller.username }}
+                    {% endif %}
+                  </a></h6>
+                  <h4 class="product_name">{{ product.product_name }}</h4>
+                  <a href="{% url 'view-product' product.id product.product_name %}" class="btn btn-danger">BUY NOW</a>
+                </div>
+                {% if product.brand_new %}
+                  <span class="new_tag">
+                    New
+                  </span> 
+                {% else %}
+                  <span class="used_tag">
+                    Used
+                  </span>
+                {% endif %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      <!-- ./Category products -->
+  </section>
+{% endblock maincontent %}
+
+{% block JS %}
+  <script src="{% static 'alaha_market/js/category_page.js' %}"></script>
+{% endblock JS %}

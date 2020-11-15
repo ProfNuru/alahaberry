@@ -1,0 +1,89 @@
+{% extends 'users/staff_base.html' %}
+{% load auth_extras %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block maincontent %}
+  <div class="row">
+    <div class="col-md-12">
+      <div class="bg-mattBlackLight my-2 p-3">                  
+        <h4 class="text-center">All Ads</h4>
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+        <div class="manage-items">
+          <input type="text" name="filter" id="filter-clerks" class="form-control" placeholder="Filter Items">
+          <button  type="button" data-toggle="modal" data-target="#adminAddClerkModal" class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Add New Ad</button>
+        </div>
+        <table class="items-table clerks-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Ad Title</th>
+              <th>Advertiser</th>
+              <th>Contact</th>
+              <th>Date Added</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ad in ads %}
+              <tr>
+                <td>{{ ad.id }}</td>
+                <td>{{ ad.title }}</td>
+                <td>{{ ad.advertiser }}</td>
+                <td>{{ ad.contact }}</td>
+                <td>{{ ad.date_added }}</td>
+                <td class="text-center">
+                  <a href="{% url 'edit-ad' ad.id %}" class="btn btn-info" style="padding:1px 5px" title="Edit"><i class="fas fa-edit"></i></a>
+                  <a href="{% url 'delete-ad' ad.id %}" class="btn btn-danger" style="padding:1px 5px" title="Delete"><i class="fas fa-trash"></i></a>
+                  <a href="{% url 'admin-ad-view' ad.id %}" class="btn btn-info" style="padding:1px 5px" title="View"><i class="fas fa-eye"></i></a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+ 	</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="adminAddClerkModal" tabindex="-1" role="dialog" aria-labelledby="adminAddClerkModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="adminAddClerkModalLabel">Add New Ad</h5>
+        {% if messages %}
+          {% for message in messages %}
+            <h3>{{ message }}</h3>
+          {% endfor %}
+        {% endif %}
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="adminAddClerkForm" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body">
+          <h5 style="color:darkred" class="errorMessages"></h5>
+          <fieldset>
+            {{ ad_form | crispy }}
+          </fieldset>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+{% endblock maincontent %}
+
+{% block JS %}
+  <script src="{% static 'users/js/all_clerks.js' %}"></script>
+{% endblock JS %}

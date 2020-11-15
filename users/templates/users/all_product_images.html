@@ -1,0 +1,44 @@
+{% extends 'users/staff_base.html' %}
+{% load static %}
+
+
+{% block CSS %}
+  <link rel="stylesheet" type="text/css" href="{% static 'products/all_product_images.css' %}">
+{% endblock CSS %}
+
+
+{% block maincontent %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'staff-dashboard' %}">Dashboard</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'admin-item-view' product.id %}">{{ product.product_name }} Detail</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Photos</li>
+  </ol>
+</nav>
+	<div class="row">
+      <div class="col-md-12">
+        <div class="bg-mattBlackLight my-2 p-3">
+          <h4>{{ product.product_uid }} {{ product.product_name }} Image Gallery</h4>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="bg-mattBlackLight my-2 p-3">
+          <div class="row">
+            {% if images|length <= 0 %}
+                <h4>No photos for this item!</h4>
+            {% else %}
+              {% for image in images %}
+                <div class="image-rows col-xs-12 col-sm-6 col-lg-4">
+                  <a href="{{ image.image.url }}">
+                    <img src="{{ image.image.url }}" class="img-responsive">
+                  </a>
+                </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock maincontent %}

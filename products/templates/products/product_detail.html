@@ -1,0 +1,193 @@
+{% extends 'alaha_market/home_base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block CSS %}
+	<link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/homepage.css' %}">
+	<style type="text/css">
+		.product-card{
+		  width: 65%;
+		  background: #fff;
+		  padding: 40px;
+		  margin: 20px auto;
+		  text-transform: uppercase;
+		  border: 2px solid #ccc;
+		  border-radius: 5px;
+		}
+		.product-card h1{
+		  font-size: 22px;
+		  margin-bottom: 4px;
+		}
+		.product-card p{
+		  font-size: 13px;
+		  color: #bbb;
+		}
+		.product-pic{
+		  text-align: center;
+		  transition: .6s linear;
+		}
+		.product-colors{
+		  margin-bottom: 40px;
+		  display: flex;
+		  justify-content: center;
+		}
+
+		.product-colors span{
+		  width: 14px;
+		  height: 14px;
+		  margin: 0 10px;
+		  border-radius: 50%;
+		  cursor: pointer;
+		  position: relative;
+		}
+		.blue{
+		  background: #7ed6df;
+		}
+		.green{
+		  background: #badc58;
+		}
+		.yellow{
+		  background: #f9ca24;
+		}
+		.rose{
+		  background: #ff7979;
+		}
+
+		.product-colors .active:after{
+		  content: "";
+		  width: 22px;
+		  height: 22px;
+		  border: 2px solid #8888;
+		  position: absolute;
+		  border-radius: 50%;
+		  box-sizing: border-box;
+		  left: -4px;
+		  top: -4px;
+		}
+		.product-info{
+		  display: flex;
+		  align-items: center;
+		}
+		.product-price{
+		  color: darkgreen;
+		  font-size: 26px;
+		}
+		.product-button{
+		  margin-left: auto;
+		  font-weight: bolder;
+		  color: red;
+		  text-decoration: none;
+		  border: 2px solid red;
+		  padding: 8px 24px;
+		  border-radius: 20px;
+		  transition: .4s linear;
+		}
+
+		.product-button:hover{
+		  transform: scale(1.06);
+		  text-decoration: none;
+		}
+	</style>
+{% endblock CSS %}
+
+
+{% block maincontent %}
+<div id="homepageWrapper">
+  
+  <!-- Product detail -->
+<div class="product-card">
+  	{% if messages %}
+	  {% for message in messages %}
+	    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+	  {% endfor %}
+	{% endif %}
+    <h1>{{ product.product_name }}</h1>
+    <p>Seller: {% if product.seller.profile.business_name == 'NA' %}
+    	{{app_setting.application_name}}
+    {% else %}
+    	{{product.seller.profile.business_name}}
+    {% endif %}
+    </p>
+    <p>{{ product.product_desc }}</p>
+    <p>{{ product.product_damages }}</p>
+    <p style="color:red">Negotiable: <input type="checkbox" disabled {% if product.negotiable %}
+    		checked
+    		{% endif %}></p>
+    {% if user.is_authenticated and user == product.seller %}
+	  <a class="btn btn-outline-success" href="{% url 'admin-add-product-image' product.id %}">Add Image</a>
+	  <a class="btn btn-outline-secondary" href="{% url 'all-product-images' product.id %}">View All Images</a>
+	  <a class="btn btn-outline-primary" href="{% url 'update-product' product.id %}">Edit Item</a>
+	{% endif %}
+    {% for product_image in product_images %}
+		{% if product_image.thumbnail %}
+			<div class="product-pic"><img src="{{ product_image.image.url }}">
+			</div>
+		{% endif %}
+	{% endfor %}
+    <div class="product-info">
+      <div class="product-price">GHC {{ product.product_price }}</div>
+
+      <button type="button" class="product-button" data-toggle="modal" data-target="#orderItemModal">Buy NOW</button>
+    </div>
+</div>
+  <!-- ./Product detail -->
+
+<!-- Modal -->
+<div class="modal fade" id="orderItemModal" tabindex="-1" role="dialog" aria-labelledby="orderItemModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="orderItemModalLabel">Order Item NOW</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form method="POST">
+      	{% csrf_token %}
+	      <div class="modal-body">
+	        {{ order_form | crispy }}
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+	        <button type="submit" class="btn btn-success">Order</button>
+	      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+  <!-- Recently Added -->
+  {% if recent_products|length > 0 %}
+    <div class="grid-heading">
+      Recently Added
+    </div>
+    <div class="row">
+      <!-- Product  -->
+      {% for recent_product in recent_products %}
+          {% for photo in productPhotos %}
+            {% if photo.product == recent_product %}
+            <div class="col-md-3 product-grid">
+              <div class="image">
+                <a href="{% url 'product-detail' recent_product.id %}">
+                  <img src="{{ photo.image.url }}" class="w-100">
+                  <div class="overlay">
+                    <div class="detail">View Details</div>
+                  </div>
+                </a>
+              </div>
+              <h5 class="text-center">{{ recent_product.product_name }}</h5>
+              <h5 class="text-center">Price: GHC {{ recent_product.product_price }}</h5>
+            </div>
+            {% endif %}
+          {% endfor %}
+      {% endfor %}
+    </div>
+  {% endif %}
+  <!-- ./Recently Added -->
+</div>
+<!-- ./Search Results -->
+{% endblock maincontent %}
+
+{% block JS %}
+
+{% endblock JS %}

@@ -1,0 +1,106 @@
+{% extends 'users/staff_base.html' %}
+{% load static %}
+{% load mathfilters %}
+
+
+{% block CSS %}
+	<link rel="stylesheet" type="text/css" href="{% static 'users/css/user_dashboard.css' %}">
+{% endblock CSS %}
+
+
+{% block maincontent %}
+	<div class="row">
+	    <div class="col-md-6 my-3">
+	      <div class="bg-mattBlackLight px-3 py-3">
+	        <h4 class="mb-2">All Earned Commissions</h4>
+	        <div class="progress">
+	          <div
+	            class="progress-bar bg-info text-mattBlackDark"
+	            role="progressbar"
+	            aria-valuenow="100"
+	            aria-valuemin="0"
+	            aria-valuemax="100"
+	          >
+	            {{ commissions.count }}
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	    <div class="col-md-6 my-3">
+	      <div class="bg-mattBlackLight px-3 py-3">
+	        <h4 class="mb-2">Paid Commissions</h4>
+	        <div class="progress">
+	          <div
+	            class="progress-bar bg-info text-mattBlackDark"
+	            role="progressbar"
+	            aria-valuenow="25"
+	            aria-valuemin="0"
+	            aria-valuemax="100"
+	          >
+	            {{ paid_commissions.count }}
+	          </div>
+	        </div>
+	      </div>
+	    </div>
+	</div>
+
+	<div class="row">
+		
+		<div class="col-md-12">
+	      <div class="bg-mattBlackLight my-2 p-3">                  
+	        <h4 class="text-center">All Commissions</h4>
+	        {% if messages %}
+	          {% for message in messages %}
+	            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+	          {% endfor %}
+	        {% endif %}
+	       
+	        <table class="items-table">
+	          <thead>
+	            <tr>
+	              <th>#</th>
+	              <th>Subscriber</th>
+	              <th><i class="fas fa-dollar-sign"></i> Commission</th>
+	              <th>Date Used</th>
+	              <th class="text-center">Status</th>
+	            </tr>
+	          </thead>
+	          <tbody>
+	          	{% if commissions.count <= 0 %}
+	          		<tr>
+	          			<td style="text-align:center;font-style:italic;color:darkred;font-size:16px" colspan="5">No Commissions earned</td>
+	          		</tr>
+	          	{% else %}
+		          	{% for commission in commissions %}
+		          		<tr>
+			              <td>{{ commission.coupon.coupon_code }}</td>
+			              <td>
+			              	{% if commission.subscriber.profile.business_name == 'Alahaberry' %}
+			              		<a href="{% url 'shops' commission.subscriber.id commission.subscriber.username %}">{{ commission.subscriber.username }}</a>
+			              	{% else %}
+			              		<a href="{% url 'shops' commission.subscriber.id commission.subscriber.username %}">{{ commission.subscriber.profile.business_name }}</a>
+			              	{% endif %}
+			              </td>
+			              <td>{{ commission.commission }}</td>
+			              <td>{{ commission.date_used }}</td>
+			              {% if commission.paid %}
+			              	<td style="background-color: #003300;color:aliceblue">Paid</td>
+			              {% else %}
+			              	<td style="background-color: #aaa;color:#111">Processing</td>
+			              {% endif %}
+			            </tr>
+		          	{% endfor %}
+	          	{% endif %}
+	          </tbody>
+	        </table>
+	        <h3>TOTAL UNPAID COMMISSIONS: GHC {{total_unpaid_commission}}</h3>
+	      </div>
+	    </div>		
+	</div>
+{% endblock maincontent %}
+
+
+{% block JS %}
+	<script src="{% static 'users/js/user_dashboard.js' %}"></script>
+{% endblock JS %}
+

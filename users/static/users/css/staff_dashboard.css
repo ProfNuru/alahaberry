@@ -1,0 +1,37 @@
+.categories-table{
+  border-collapse: collapse;
+  margin: 25px 0;
+  font-size: 0.9em;
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+.categories-table thead tr{
+  background-color: #c06;
+  color: aliceblue;
+  text-align: left;
+  font-weight: bold;
+}
+.categories-table th,
+.categories-table td{
+  padding: 12px 15px;
+}
+.categories-table tbody tr{
+  border-bottom: 1px solid #555;
+  color: #fff;
+}
+.categories-table tbody tr:nth-of-type(even){
+  background-color: #666;
+}
+.categories-table tbody tr:nth-of-type(odd){
+  background-color: #444;
+}
+.categories-table tbody tr:last-of-type{
+  border-bottom: 2px solid #c06;
+}
+.categories-table tbody tr.active-row{
+  font-weight: bold;
+  color: #fff;
+}
+/* End of Items table */

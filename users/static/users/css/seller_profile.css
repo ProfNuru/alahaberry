@@ -1,0 +1,23 @@
+.profile-card{
+	display: flex;
+	margin: 5% auto;
+	text-align: center;
+	flex-direction: column;
+}
+.profile-card .profile-img{
+	height: 300px;
+}
+.profile-card .profile-img img{
+	max-height: 100%;
+}
+.profile-card .profile-info{
+	margin-top: 5%;
+	margin-bottom: 5%;
+	text-align: left;	
+	padding-left: 10%;
+	color: aliceblue;
+	font-weight: bolder;
+}
+.profile-card .profile-info .labels{
+	color: #777;
+}

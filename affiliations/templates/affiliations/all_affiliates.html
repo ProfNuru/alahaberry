@@ -1,0 +1,187 @@
+{% extends 'users/staff_base.html' %}
+{% load auth_extras %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block maincontent %}
+  <div class="row">
+    <div class="col-md-4 my-3">
+      <div class="bg-mattBlackLight px-3 py-3">
+        <h4 class="mb-2"><i class="fas fa-store"></i> All Sales Persons</h4>
+        <div class="progress">
+          <div
+            class="progress-bar bg-warning text-mattBlackDark"
+            role="progressbar"
+            aria-valuenow="100"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            {{ coupons.count }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 my-3">
+      <div class="bg-mattBlackLight px-3 py-3">
+        <h4 class="mb-2"><i class="fas fa-file-signature"></i> Pending Commissions</h4>
+        <div class="progress">
+          <div
+            class="progress-bar bg-info text-mattBlackDark"
+            role="progressbar"
+            aria-valuenow="100"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            {{ unpaid_commissions }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 my-3">
+      <div class="bg-mattBlackLight p-3">
+        <h4 class="mb-2"><i class="fas fa-clock"></i> Paid Commissions</h4>
+        <div class="progress">
+          <div
+            class="progress-bar bg-success"
+            role="progressbar"
+            aria-valuenow="100"
+            aria-valuemin="0"
+            aria-valuemax="100"
+          >
+            {{ paid_commissions }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <div class="bg-mattBlackLight my-2 p-3">                  
+        <h4 class="text-center">All Sales Person</h4>
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+        <div class="manage-items">
+          <input type="text" name="filter" id="filter-sellers" class="form-control" placeholder="Filter Sales Persons">
+          {% if user|has_group:"admins" %}
+            <button  type="button" data-toggle="modal" data-target="#adminAddClerkModal" class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Add Sales Person</button>
+          {% endif %}
+        </div>
+        <table class="items-table sellers-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th><i class="fas fa-user"></i> Sales Person</th>
+              <th><i class="fas fa-file-signature"></i> Phone</th>
+              <th class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for coupon in coupons %}
+              <tr>
+                <td>{{ coupon.coupon_code }}</td>
+                <td>{{ coupon.user.username }}</td>
+                <td>{{ coupon.user.profile.phone_number }}</td>
+                <td class="text-center">
+                  <a href="#" data-toggle="modal" data-target="#viewSalesPersonModal{{coupon.user.id}}" class="btn btn-info" style="padding:1px 5px"><i class="fas fa-eye"></i></a>
+                  <a href="#" data-toggle="modal" data-target="#editCouponCodeModal{{coupon.id}}" class="btn btn-primary" style="padding:1px 5px"><i class="fas fa-edit"></i></a>
+                  <a href="{% url 'commissions' coupon.id %}" class="btn btn-secondary" style="padding:1px 5px"><i class="fas fa-money-bill-wave-alt"></i></a>
+                </td>
+              </tr>
+              <!-- View Sales Person details -->
+              <div class="modal fade" id="viewSalesPersonModal{{coupon.user.id}}" tabindex="-1" aria-labelledby="viewSalesPersonModal{{coupon.user.id}}Label" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="viewSalesPersonModal{{coupon.user.id}}Label">{{ coupon.user.username }} Details</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <p><img src="{{coupon.user.profile.image.url}}"></p>
+                      <h5>{{coupon.user.get_full_name}}</h5>
+                      <h5>{{coupon.user.email}}</h5>
+                      <h5>ID: {{coupon.coupon_code}}</h5>
+                      <h5>Contact: {{coupon.user.profile.phone_number}}</h5>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Edit Coupon code -->
+              <div class="modal fade" id="editCouponCodeModal{{coupon.id}}" tabindex="-1" aria-labelledby="editCouponCodeModal{{coupon.id}}Label" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="viewSalesPersonModal{{coupon.user.id}}Label">Edit {{ coupon.user.username }} coupon code</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <form method="POST" action="{% url 'edit-coupon-code' coupon.id %}">
+                      {% csrf_token %}
+                      <div class="modal-body">
+                          <div class="form-group">
+                            <label for="coupon_code">Coupon Code</label>
+                            <input type="text" class="form-control" id="coupon_code" name="coupon_code" value="{{coupon.coupon_code}}">
+                          </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Add User Modal -->
+<div class="modal fade" id="adminAddClerkModal" tabindex="-1" role="dialog" aria-labelledby="adminAddClerkModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="adminAddClerkModalLabel">Add Sales Person</h5>
+        {% if messages %}
+          {% for message in messages %}
+            <h3>{{ message }}</h3>
+          {% endfor %}
+        {% endif %}
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <form id="adminAddClerkForm" method="POST" action="{% url 'add-affiliate' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <h5 style="color:darkred" class="errorMessages"></h5>
+          <fieldset>
+            {{ add_sales_person_form | crispy }}
+          </fieldset>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+{% endblock maincontent %}
+{% block JS %}
+  <script src="{% static 'users/js/manage_users.js' %}"></script>
+{% endblock JS %}

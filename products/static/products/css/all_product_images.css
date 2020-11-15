@@ -1,0 +1,10 @@
+.image-rows a{
+	display: inline-block;
+	border: 2px solid #333;
+	padding: 3px;
+	margin: 10px;
+	height: 100px;
+}
+.image-rows a img{
+	height: 100%;
+}

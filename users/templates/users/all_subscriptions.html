@@ -1,0 +1,113 @@
+{% extends 'users/staff_base.html' %}
+{% load static %}
+{% load auth_extras %}
+
+{% block maincontent %}
+  <div class="row">
+    <div class="col-md-12 my-3">
+      <div class="bg-mattBlackLight px-3 py-3">
+        <h4 class="mb-2"><i class="fas fa-file-signature"></i> Subscriptions</h4>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12 col-sm-12">
+      <div class="bg-mattBlackLight my-2 p-3">
+        <h4 class="text-center">Pending Subscriptions</h4>
+        <div class="manage-orders">
+        <table class="new-orders-table">
+          <thead>
+            <tr>
+              <th>Seller</th>
+              <th>Subscription package</th>
+              <th>Months</th>
+              <th>Activate Subscription</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sub_request in subscription_requests %}
+              <tr>
+                <td>{{ sub_request.user.username }}</td>
+                <td>{{ sub_request.subscription_package.title }}</td>
+                <td>{{ sub_request.months }}</td>
+                <td><button type="button" data-toggle="modal" data-target="#requestSubscriptionModal{{sub_request.user.username}}" class="btn btn-success" href="#">Accept Payment</button></td>
+              </tr>
+              <!-- Request Subscription Modal -->
+              <div class="modal fade" id="requestSubscriptionModal{{sub_request.user.username}}" tabindex="-1" role="dialog" aria-labelledby="requestSubscriptionModal{{sub_request.user.username}}Label" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="requestSubscriptionModal{{sub_request.user.username}}Label">Request Subscription</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <form id="updateSubscription" method="POST">
+                      {% csrf_token %}
+                      <input type="hidden" name="subscription_request_id" value="{{sub_request.id}}">
+                      <div class="modal-body">
+                        <h3>Subscription Request Details</h3>
+                          <div class="row">
+                            <div class="col-md-12">
+                              <h5>Package: {{sub_request.subscription_package.title}}</h5>
+                              <h5>Cost per month: GHC {{sub_request.subscription_package.cost_per_month}}</h5>
+                              <h5>Number of months requested: {{sub_request.months}}</h5>
+                              <h4>Total amount to pay: GHC {{sub_request.amount_to_pay}}</h4>                      
+                            </div>
+                          </div>
+                          <hr>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success">Subscription Paid</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col-md-12 col-sm-12">
+      <div class="bg-mattBlackLight my-2 p-3">                  
+        <h4 class="text-center">Subscription History</h4>
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+        <div class="manage-subscriptions">
+          <input type="text" name="filter" id="filter-subscriptions" class="form-control" placeholder="Filter Items">
+        </div>
+        <table class="items-table subscriptions-table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-list-ol"></i></th>
+              <th><i class="fas fa-user"></i> Seller</th>
+              <th><i class="fas fa-file-signature"></i> Subscription Package</th>
+              <th class="text-center">Date Subscribed</th>
+              <th class="text-center">Subscription Expiry</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for subscription in subscriptions %}
+              <tr>
+                <td>{{ subscription.id }}</td>
+                <td>{{ subscription.user.username }}</td>
+                <td>{{ subscription.subscription_package.title }}</td>
+                <td class="text-center">{{ subscription.date_subscribed }}</td>
+                <td class="text-center">{{ subscription.subscription_end }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+ 	</div>
+{% endblock maincontent %}
+
+{% block JS %}
+  <script src="{% static 'users/js/all_subscriptions.js' %}"></script>
+{% endblock JS %}

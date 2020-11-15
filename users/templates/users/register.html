@@ -1,0 +1,22 @@
+{% extends 'alaha_market/home_base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block CSS %}
+  <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/login.css' %}">
+{% endblock CSS %}
+
+{% block maincontent %}
+  <h4 class="login-form-heading" style="width:70%;margin:20px auto;text-align:center;">Register NOW for your own Online Shop</h4>
+  <div class="form_field row">
+    <form class="col-xl-8 col-md-8 col-sm-12 mr-auto ml-auto" method="POST">
+      {% csrf_token %}
+      <fieldset>
+        {{form|crispy}}
+      </fieldset>
+      <button class="btn btn-outline-success" type="submit">Start Selling NOW</button>
+      <p>Already have a shop? <a href="{% url 'login' %}">Sign In here</a></p>
+    </form>
+  </div>
+{% endblock maincontent %}
+

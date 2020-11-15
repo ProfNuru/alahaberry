@@ -1,0 +1,29 @@
+.modal .modal-body{
+	display: flex;
+	flex-direction: column;
+	background-color: aliceblue;
+	color: #111;
+}
+.modal .modal-body h3{
+	text-align: center;
+}
+.modal .modal-body .ordered_item_details{
+	display: flex;
+}
+.modal .modal-body .ordered_item_details .ordered_item_img{
+	height: 250px;
+}
+.modal .modal-body .ordered_item_details .ordered_item_img img{
+	max-height: 100%;
+	max-width: 100%;
+}
+.modal .modal-body .ordered_item_details .ordered_item_desc{
+	display: flex;
+	flex-direction: column;
+}
+.modal .modal-body .customer_details{
+	display: flex;
+	flex-direction: column;
+	border: 1px solid #aaa;
+	border-radius: 10px;
+}

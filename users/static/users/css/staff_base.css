@@ -1,0 +1,213 @@
+@import url("https://fonts.googleapis.com/css?family=Poppins:400,600,700");
+@import url("https://fonts.googleapis.com/css?family=Courgette");
+.bg-mattBlackLight {
+  background-color: #303337;
+}
+
+.text-mattBlackLight {
+  color: #303337;
+}
+
+.bg-mattBlackDark, body, .nav-link:hover, .nav-link.active {
+  background-color: #212121;
+}
+
+.text-mattBlackDark {
+  color: #212121;
+}
+
+.bg-mattGray {
+  background-color: #878d8d;
+}
+
+.text-mattGray, body, .nav-link .icon, .nav-link .text {
+  color: #878d8d;
+}
+
+.bg-mattRed {
+  background-color: #ec6271;
+}
+
+.text-mattRed, .nav-link:hover .icon,
+.nav-link:hover .text, .nav-link.active .icon,
+.nav-link.active .text {
+  color: #ec6271;
+}
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  height: 1000px;
+}
+
+.wrapper {
+  margin-top: 3.5rem;
+}
+
+.wrapper .sideMenu {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  margin: 3.5rem auto auto;
+  left: 0;
+  width: 14rem;
+  -webkit-transition: all ease 0.25s;
+  transition: all ease 0.25s;
+  -webkit-transform: translateX(-100%);
+          transform: translateX(-100%);
+  z-index: 2000;
+}
+
+.wrapper .content {
+  width: 100%;
+  margin-left: 0rem;
+  -webkit-transition: all ease 0.25s;
+  transition: all ease 0.25s;
+}
+
+.wrapper.active .sideMenu {
+  -webkit-transform: translateX(0);
+          transform: translateX(0);
+}
+
+.nav-link {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  display: block;
+  white-space: nowrap;
+}
+
+.nav-link .icon {
+  margin-right: 0.25rem;
+  font-size: 1.875rem;
+  vertical-align: middle;
+  height: 2rem;
+  width: 2rem;
+  display: -webkit-inline-box;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.nav-link .text {
+  font-size: 0.875rem;
+}
+
+/* Notification cards */
+.progress{
+  height: 20px;
+}
+.progress-bar{
+  font-size: 1.5em;
+  width: 100%;
+}
+
+
+/* Items table */
+.manage-items,
+.manage-orders{
+  display: flex;
+  justify-content: space-between;
+}
+.manage-items button,
+.manage-orders button{
+  display: inline-block;
+  min-width: 150px;
+}
+.manage-items input,
+.manage-orders input{
+  margin-right: 15px;
+  display: inline-block;
+}
+
+
+.items-table,
+.categories-table,
+.new-orders-table{
+  border-collapse: collapse;
+  margin: 25px 0;
+  font-size: 0.9em;
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+.items-table thead tr,
+.categories-table thead tr,
+.new-orders-table thead tr{
+  background-color: #c06;
+  color: aliceblue;
+  text-align: left;
+  font-weight: bold;
+}
+.items-table th,
+.items-table td,
+.categories-table th,
+.categories-table td,
+.new-orders-table th,
+.new-orders-table td{
+  padding: 12px 15px;
+}
+.items-table tbody tr,
+.categories-table tbody tr,
+.new-orders-table tbody tr{
+  border-bottom: 1px solid #555;
+  color: #fff;
+}
+.items-table tbody tr:nth-of-type(even),
+.categories-table tbody tr:nth-of-type(even),
+.new-orders-table tbody tr:nth-of-type(even){
+  background-color: #666;
+}
+.items-table tbody tr:nth-of-type(odd),
+.categories-table tbody tr:nth-of-type(odd),
+.new-orders-table tbody tr:nth-of-type(odd){
+  background-color: #444;
+}
+.items-table tbody tr:last-of-type,
+.categories-table tbody tr:last-of-type,
+.new-orders-table tbody tr:last-of-type{
+  border-bottom: 2px solid #c06;
+}
+.items-table tbody tr.active-row,
+.categories-table tbody tr.active-row,
+.new-orders-table tbody tr.active-row{
+  font-weight: bold;
+  color: #fff;
+}
+/* End of Items table */
+
+
+
+@media (min-width: 992px) {
+  .wrapper .sideMenu {
+    -webkit-transform: translateX(0);
+            transform: translateX(0);
+  }
+  .wrapper .content {
+    margin-left: 12.5rem;
+  }
+  .wrapper.active .sideMenu {
+    width: 5rem;
+  }
+  .wrapper.active .sideMenu .nav-link {
+    text-align: center;
+  }
+  .wrapper.active .sideMenu .nav-link .icon {
+    margin-right: 0;
+  }
+  .wrapper.active .sideMenu .nav-link .text {
+    display: none;
+  }
+  .wrapper.active .content {
+    margin-left: 5rem;
+  }
+}
