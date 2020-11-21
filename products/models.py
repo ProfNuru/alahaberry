@@ -10,7 +10,7 @@ from django.utils import timezone
 # Sample of an ID generator - could be any string/number generator
 # For a 6-char field, this one yields 2.1 billion unique IDs
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
-		return ''.join(random.choice(chars) for _ in range(size))
+	return ''.join(random.choice(chars) for _ in range(size))
 
 
 class Categorie(models.Model):

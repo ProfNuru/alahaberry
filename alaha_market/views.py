@@ -34,8 +34,8 @@ def homepage(request):
 		'title': "Alahaberry | Buy and Sell anything",
 		'home_nav_active': 'activeNav',
 		'shops': sellers,
-		'products': Product.objects.all(),
-		'popular_products': Product.objects.filter(seller__profile__subscription_end__gt=timezone.now()),
+		'products': Product.objects.select_related("seller").all(),
+		'popular_products': Product.objects.select_related("seller").filter(seller__profile__subscription_end__gt=timezone.now()),
 		'horizontal_ads': horizontal_ads
 	}
 	return render(request,'alaha_market/homepage.html', context)
@@ -51,15 +51,15 @@ def all_products(request):
 
 	if int(category_id) > 0 and query:
 		category = Categorie.objects.get(id=int(category_id))
-		products = Product.objects.filter(Q(product_name__icontains=query)|Q(product_desc__icontains=query)|Q(tags__icontains=query),category=category)
+		products = Product.objects.select_related("seller").filter(Q(product_name__icontains=query)|Q(product_desc__icontains=query)|Q(tags__icontains=query),category=category)
 		print(category)
 	elif query:
 		category = 'None'
-		products = Product.objects.filter(Q(product_name__icontains=query)|Q(product_desc__icontains=query)|Q(tags__icontains=query))
+		products = Product.objects.select_related("seller").filter(Q(product_name__icontains=query)|Q(product_desc__icontains=query)|Q(tags__icontains=query))
 		all_categories = True
 	else:
 		category = 'None'
-		products = Product.objects.all()
+		products = Product.objects.select_related("seller").all()
 		all_categories = True
 
 
@@ -75,7 +75,7 @@ def all_products(request):
 
 
 def new_products(request):
-	products = Product.objects.filter(brand_new=True)
+	products = Product.objects.select_related("seller").filter(brand_new=True)
 
 	context = {
 		'title': "Alahaberry | Brand New Items",
@@ -87,7 +87,7 @@ def new_products(request):
 
 
 def used_products(request):
-	products = Product.objects.filter(brand_new=False)
+	products = Product.objects.select_related("seller").filter(brand_new=False)
 
 	context = {
 		'title': "Alahaberry | Slightly Used Items",
@@ -99,7 +99,7 @@ def used_products(request):
 
 
 def view_product(request, pk, productname):
-	product = Product.objects.get(id=pk, product_name=productname)
+	product = Product.objects.select_related("seller").get(id=pk, product_name=productname)
 	if not request.user.is_authenticated:
 		try:
 			hit = product.product_hit
@@ -158,13 +158,13 @@ def category_view(request, pk):
 	context = {
 		'title': "Alahaberry | "+ category.category_name,
 		'category': category,
-		'products': Product.objects.filter(category=category)
+		'products': Product.objects.select_related("seller").filter(category=category)
 	}
 	return render(request, 'alaha_market/category_page.html', context)
 
 
 def shops(request, pk, shopname):
-	seller = User.objects.get(id=pk, username=shopname)
+	seller = User.objects.select_related("profile").get(id=pk, username=shopname)
 	if seller.profile.subscription_end < timezone.now():
 		return redirect('all-shops')
 
@@ -183,7 +183,7 @@ def shops(request, pk, shopname):
 
 
 def all_shops(request):
-	sellers = User.objects.filter(groups__name='sellers', profile__subscription_end__gt=timezone.now())
+	sellers = User.objects.select_related("profile").filter(groups__name='sellers', profile__subscription_end__gt=timezone.now())
 
 	context = {
 		'title': "Alahaberry | On Sale",
@@ -202,7 +202,7 @@ def subscribe(request):
 		
 		context = {
 			'title': "Alahaberry | Thank you for subscribing",
-			'products': Product.objects.all().order_by('-id')
+			'products': Product.objects.select_related("seller").all().order_by('-id')
 		}
 		return render(request, 'alaha_market/subscription_complete.html', context)
 

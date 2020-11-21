@@ -75,43 +75,6 @@
 
 
 {% block maincontent %}
-  <!-- Most Popular -->
-  <div id="most-popular">
-    <h1>MOST POPULAR</h1>
-    <h6>What most people are viewing!</h6>
-    <div class="line-design"></div>
-    <div class="items">
-      {% for product in popular_products %}
-        {% if product.product_thumbnail %}
-          <!--<div class="card col-xl-3 col-md-3 col-sm-6">
-            <img loading="lazy" src="{{ product.product_thumbnail.url }}">
-            <div class="card-body">
-              <h6 class="store_name"><a href="{% url 'shops' product.seller.id product.seller.username %}">
-                {% if product.seller.profile.business_name != 'NA' %}
-                  {{ product.seller.profile.business_name }}
-                {% else %}
-                  {{ product.seller.username }}
-                {% endif %}
-              </a></h6>
-              <h4 class="product_name">{{ product.product_name }}</h4>
-              <a href="{% url 'view-product' product.id product.product_name %}" class="btn btn-danger">BUY NOW</a>
-            </div>
-            {% if product.brand_new %}
-              <span class="new_tag">
-                New
-              </span> 
-            {% else %}
-              <span class="used_tag">
-                Used
-              </span>
-            {% endif %}
-          </div>-->
-        {% endif %}
-      {% endfor %}
-    </div>
-  </div>
-  <!-- ./Most Popular -->
-
   <!-- New Arrivals -->
   <div id="new-arrivals">
     <h1>ALL LISTINGS</h1>
@@ -185,6 +148,42 @@
     {% endfor %}
   </div>
   <!-- ./Advertisements -->
+  <!-- Most Popular -->
+  <div id="most-popular">
+    <h1>MOST POPULAR</h1>
+    <h6>What most people are viewing!</h6>
+    <div class="line-design"></div>
+    <div class="items">
+      {% for product in popular_products %}
+        {% if product.product_thumbnail %}
+          <!--<div class="card col-xl-3 col-md-3 col-sm-6">
+            <img loading="lazy" src="{{ product.product_thumbnail.url }}">
+            <div class="card-body">
+              <h6 class="store_name"><a href="{% url 'shops' product.seller.id product.seller.username %}">
+                {% if product.seller.profile.business_name != 'NA' %}
+                  {{ product.seller.profile.business_name }}
+                {% else %}
+                  {{ product.seller.username }}
+                {% endif %}
+              </a></h6>
+              <h4 class="product_name">{{ product.product_name }}</h4>
+              <a href="{% url 'view-product' product.id product.product_name %}" class="btn btn-danger">BUY NOW</a>
+            </div>
+            {% if product.brand_new %}
+              <span class="new_tag">
+                New
+              </span> 
+            {% else %}
+              <span class="used_tag">
+                Used
+              </span>
+            {% endif %}
+          </div>-->
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+  <!-- ./Most Popular -->
 
 
 {% endblock maincontent %}
