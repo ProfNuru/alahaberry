@@ -11,11 +11,9 @@
 {% block maincontent %}
 {% if user|has_group:"sellers" %}
   <div style="margin-left: 30px">
-      <h2 style="color:aliceblue">Set a Unique and Catchy Business Name in 'Edit Shop Profile'</h2>
-      <h5 style="color:aliceblue">Direct Customers to your Online Shop with your Shop URL (Will only Show when you are Subscribed)</h5>
       <h5 style="color:aliceblue">Upload a photo or an avatar for your Shop in 'Edit Shop Profile'</h5>
       <h5 style="color:aliceblue">Set an active Phone number and/or Email address in 'Edit Shop Profile'</h5>
-      <h5 style="color:aliceblue">Handle your item orders by checking the 'handle Orders' checkbox in 'Edit Shop Profile'. This will only apply if you are subscribed</h5>
+      <h5 style="color:aliceblue">Alahaberry will contact you when an order is made for any of your items</h5>
   </div>
 {% endif %}
 <div class="row">
@@ -37,11 +35,6 @@
       			<h6><span class="labels">Phone number:</span> {{ user.profile.phone_number }}</h6>
       		{% else %}
       			<h4><span class="labels">Business name:</span> {{ user.profile.business_name }}</h4>
-            {% if user|has_group:"sellers" %}
-              {% if subbed %}
-                <h5><span class="labels">Shop URL:</span> <a href="{% url 'shops' request.user.id request.user.username %}">alahaberry.com{% url 'shops' request.user.id request.user.username %}</a></h5>
-              {% endif %}
-            {% endif %}
         		<h5><span class="labels">Email:</span> {{ user.email }}</h5>
         		<h6><span class="labels">Phone number:</span> {{ user.profile.phone_number }}</h6>
       		{% endif %}

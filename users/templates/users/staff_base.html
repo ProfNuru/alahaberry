@@ -95,7 +95,7 @@
                 <a class="dropdown-item" href="{% url 'discount-settings' 1 %}"><i class="fas fa-toolbox"></i> Discount Settings</a>
               {% endif %}
                 <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="{% url 'account_logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                <a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </div>
           </li>
         </ul>
@@ -161,6 +161,11 @@
                     <i class="fab fa-affiliatetheme icon"></i><span class="text">Sales Persons</span></a
                   >
                 </li>
+                <li class="nav-item">
+                  <a href="{% url 'item-sales' %}" class="nav-link px-2">
+                    <i class="fas fa-money-check-alt icon"></i><span class="text">Sales</span></a
+                  >
+                </li>
               {% elif user|has_group:"clerks" %}
                 <li class="nav-item">
                   <a href="{% url 'staff-dashboard' %}" class="nav-link px-2">
@@ -192,10 +197,9 @@
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="{% url 'subscriptions' %}" class="nav-link px-2">
-                    <i class="fas fa-file-signature icon"></i>
-                    <span class="text">Subscriptions</span>
-                  </a>
+                  <a href="{% url 'individual-sales' %}" class="nav-link px-2">
+                    <i class="fas fa-money-check-alt icon"></i><span class="text">Sales</span></a
+                  >
                 </li>
               {% elif user|has_group:"affiliates" %}
                 <li class="nav-item">

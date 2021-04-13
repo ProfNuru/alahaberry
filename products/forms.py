@@ -1,5 +1,5 @@
 from django import forms
-from .models import Product,Order,Categorie, Damage
+from .models import Product,Order,Categorie, Damage, ItemColor
 
 
 class CreateProductForm(forms.ModelForm):
@@ -17,6 +17,11 @@ class CreateProductDamageForm(forms.ModelForm):
 		model = Damage
 		fields = ['image','description']
 
+
+class CreateItemColorForm(forms.ModelForm):
+	class Meta:
+		model = ItemColor
+		fields = ['color','description','image1','image2','image3','image4']
 
 class CreateOrderForm(forms.ModelForm):
 	class Meta:

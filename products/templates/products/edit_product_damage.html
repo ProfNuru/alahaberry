@@ -18,7 +18,7 @@
 		  	
 		  	<form method="POST" enctype="multipart/form-data">
 	        	{% csrf_token %}
-	        	<legend class="mb-4"><i class="fas fa-plus-circle"></i> Edit Damage on {{damage.product.product_name}} ({{damage.product.product_uid}})</legend>
+	        	<legend class="mb-4"><i class="fas fa-plus-circle"></i> Edit Condition (Any breakages or damages) of {{damage.product.product_name}} ({{damage.product.product_uid}})</legend>
 				{% if damage.image %}
 					<div class="product_damage_img_holder" style="height: 250px; width: 300px">
 						<img src="{{damage.image.url}}" style="height:100%; width:100%">

@@ -1,25 +1,22 @@
-{% extends 'alaha_market/home_base.html' %}
+{% extends 'users/auth_base.html' %}
 {% load crispy_forms_tags %}
-{% load static %}
+{% load socialaccount %}
 
-{% block CSS %}
-  <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/login.css' %}">
-{% endblock CSS %}
 
 {% block maincontent %}
-	<h4 class="login-form-heading" style="width:70%;margin:20px auto;text-align:center;">Logout</h4>
-	  <div class="form_field row">
-	  <div class="col-xl-8 col-md-8 col-sm-12 mr-auto ml-auto">
-	    <h4>Are you sure you want to logout?</h4>
-	    <form method="post" action="{% url 'account_logout' %}">
-		  {% csrf_token %}
-		  {% if redirect_field_value %}
-		  	<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
-		  {% endif %}
-		  <button type="submit" class="btn btn-danger btn-lg">Logout</button>
-		</form>
-	  </div>
+  <div class="card-header">Logout</div>
+  <div class="card-body">
+  	<h4>Are you sure you want to logout?</h4>
+    <form method="post" action="{% url 'account_logout' %}">
+	  {% csrf_token %}
+	  {% if redirect_field_value %}
+	  	<input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+	  {% endif %}
+	  <button type="submit" class="btn btn-danger btn-lg btn-block">Logout</button>
+	</form>
+	<div class="text-center" style="margin-top:5px">
+		<p><a href="{% url 'staff-dashboard' %}">Dashboard</a></p>
+		<p><a href="{% url 'homepage' %}">Home page</a></p>
 	</div>
-	
+  </div>
 {% endblock maincontent %}
-

@@ -39,7 +39,7 @@ class Product(models.Model):
 	product_image3 = models.ImageField(upload_to='product_pics',null=True,blank=True)
 	availability = models.BooleanField(default=True)
 	brand_new = models.BooleanField(verbose_name="Brand New Item!",default=True)
-	featured = models.BooleanField(verbose_name="Discount?",default=False)
+	featured = models.BooleanField(default=False)
 	discount_percentage = models.IntegerField(blank=True, null=True, default=0)
 	brand = models.CharField(null=True, blank=True,max_length=100)
 	quantity = models.IntegerField(blank=True, null=True, default=0)
@@ -71,10 +71,23 @@ class Product(models.Model):
 		super(Product, self).save()
 
 
+class ItemColor(models.Model):
+	product = models.ForeignKey(Product, on_delete=models.CASCADE)
+	color = models.CharField(verbose_name="Color or type", max_length=50)
+	description = models.TextField(null=True, blank=True)
+	image1 = models.ImageField(verbose_name="First image", null=False, blank=True, upload_to='product_colors')
+	image2 = models.ImageField(verbose_name="Second image", null=False, blank=True, upload_to='product_colors')
+	image3 = models.ImageField(verbose_name="Third image", null=False, blank=True, upload_to='product_colors')
+	image4 = models.ImageField(verbose_name="Fourth image", null=False, blank=True, upload_to='product_colors')
+	
+	def __str__(self):
+		return f'{self.color}'
+
+
 class Damage(models.Model):
 	product = models.ForeignKey(Product, on_delete=models.CASCADE)
 	description = models.TextField(null=True, blank=True)
-	image = models.ImageField(null=False, blank=True, upload_to='product_damages')
+	image = models.ImageField(verbose_name="Image to highlight condition", null=False, blank=True, upload_to='product_damages')
 
 	def __str__(self):
 		return f'{self.description}'
@@ -104,6 +117,34 @@ class Order(models.Model):
 
 	def __str__(self):
 		return f'{self.name} ordered {self.product}'
+
+
+class ItemRequest(models.Model):
+	clerk = models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
+	number_of_items = models.PositiveIntegerField(default=1)
+	total_amount = models.DecimalField(decimal_places=2,max_digits=20)
+	customer_email = models.EmailField()
+	customer_phone = models.CharField(max_length=15)
+	delivered = models.BooleanField(default=False)
+	delivered_by = models.TextField(null=True, blank=True)
+	date_requested = models.DateTimeField(default=timezone.now)
+
+
+	def __str__(self):
+		return f'{self.number_of_items} items for {self.total_amount} requested'
+
+
+class SoldItem(models.Model):
+	item = models.ForeignKey(Product, on_delete=models.CASCADE)
+	request = models.ForeignKey(ItemRequest, on_delete=models.CASCADE)
+	qty = models.PositiveIntegerField(default=1)
+	amount = models.DecimalField(decimal_places=2,max_digits=20)
+	payment_made = models.BooleanField(default=False)
+	seller_earning = models.DecimalField(decimal_places=2,max_digits=20,default=0.00)
+
+
+	def __str__(self):
+		return f'{self.qty} of {self.item.product_name} for {self.amount}'
 
 
 class ProductHit(models.Model):

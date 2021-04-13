@@ -33,6 +33,7 @@ class AlahaBerrySetting(models.Model):
 	google_url = models.CharField(max_length=250, null=True,blank=True)
 	linkedin_url = models.CharField(max_length=250, null=True,blank=True)
 	logo = models.ImageField(default="default.jpg", upload_to='application_images')
+	cover_photo = models.ImageField(default="default.jpg", upload_to='application_images')
 	favicon = models.ImageField(verbose_name="Favicon 16X16", default="default.jpg", upload_to='application_images')
 	charges_on_sale = models.DecimalField(verbose_name="Percentage charge on sale",default=0.00,null=True,decimal_places=2,max_digits=5)
 	commission_on_subscription = models.DecimalField(default=5.00, null=True, decimal_places=3, max_digits=5)

@@ -47,15 +47,13 @@ class UserUpdateForm(forms.ModelForm):
 class ProfileUpdateForm(forms.ModelForm):
 	class Meta:
 		model = Profile
-		fields = ['image', 'business_name', 'business_address', 
-				'business_city', 'business_certificate', 'seller_id',
-				'phone_number','handle_orders']
+		fields = ['image', 'phone_number']
 
-	def __init__(self, *args, **kwargs):
-		check_sales_person = kwargs.pop('check_sales_person', False)
-		super(ProfileUpdateForm, self).__init__(*args, **kwargs)
-		if check_sales_person:
-			del self.fields['business_name'],self.fields['business_address'],self.fields['business_city'],self.fields['business_certificate'],self.fields['handle_orders']
+	# def __init__(self, *args, **kwargs):
+	# 	check_sales_person = kwargs.pop('check_sales_person', False)
+	# 	super(ProfileUpdateForm, self).__init__(*args, **kwargs)
+	# 	if check_sales_person:
+	# 		del self.fields['business_name'],self.fields['business_address'],self.fields['business_city'],self.fields['business_certificate'],self.fields['handle_orders']
 
 
 
@@ -68,7 +66,7 @@ class CreateAdForm(forms.ModelForm):
 class AlahaBerrySettingUpdateForm(forms.ModelForm):
 	class Meta:
 		model = AlahaBerrySetting
-		fields = ['application_name','about','logo','favicon','address',
+		fields = ['application_name','about','logo','cover_photo','favicon','address',
 		'contact1','contact2','contact3','email','google_map',
 		'region','city','facebook_url','twitter_url','instagram_url',
 		'linkedin_url','google_url','charges_on_sale','commission_on_subscription','commission_rate_on_sale']

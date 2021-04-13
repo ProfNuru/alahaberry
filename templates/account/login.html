@@ -1,28 +1,24 @@
-{% extends 'alaha_market/home_base.html' %}
+{% extends 'users/auth_base.html' %}
 {% load crispy_forms_tags %}
-{% load static %}
 {% load socialaccount %}
 
 
-{% block CSS %}
-  <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/login.css' %}">
-{% endblock CSS %}
-
-
 {% block maincontent %}
-  <h4 class="login-form-heading" style="width:70%;margin:20px auto;text-align:center;">Login to Alahaberry</h4>
-  <div class="form_field row">
-    <form class="col-xl-6 col-md-6 col-sm-12 mr-auto ml-auto" method="POST">
+  <div class="card-header">Login to Alahaberry</div>
+  <div class="card-body">
+    <form method="POST">
       {% csrf_token %}
-      <fieldset>
-        {{form|crispy}}
-      </fieldset>
-      <button class="btn btn-outline-success btn-lg" type="submit">Login</button>
-      <a href="{% provider_login_url 'google' %}" class="btn btn-danger btn-lg"><i class="fab fa-google"></i> Google Login</a>
-      <a href="{% provider_login_url 'facebook' %}" class="btn btn-primary btn-lg"><i class="fab fa-facebook"></i> Facebook Login</a>
+      {{form|crispy}}
+      <button type="submit" class="btn btn-primary btn-lg btn-block">Login</button>
+    </form>
+    <div class="text-center" style="margin-top:5px">
+      <a href="{% provider_login_url 'google' %}" class="btn btn-danger btn-lg btn-block"><i class="fab fa-google"></i> Google Login</a>
+      <a href="{% provider_login_url 'facebook' %}" class="btn btn-primary btn-lg btn-block"><i class="fab fa-facebook"></i> Facebook Login</a>
       <p>Need an account? <a href="{% url 'account_signup' %}">Sign Up</a></p>
       <p>Forgot your password? <a href="{% url 'account_reset_password' %}">Reset password</a></p>
-    </form>
+    </div>
   </div>
 {% endblock maincontent %}
 
+
+  

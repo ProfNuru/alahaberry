@@ -15,9 +15,9 @@ from django.core.mail import send_mail
 import datetime
 import pytz
 
-from .models import Product, Order, Categorie, Damage
+from .models import Product, Order, Categorie, Damage, ItemColor
 from users.models import AlahaBerrySetting
-from .forms import CreateOrderForm, CreateCategoryForm, CreateProductDamageForm
+from .forms import CreateOrderForm, CreateCategoryForm, CreateProductDamageForm, CreateItemColorForm
 
 
 
@@ -64,6 +64,49 @@ def add_product_damage(request, id):
 
 
 @login_required
+def add_item_color(request, id):
+	product = Product.objects.get(id=id)
+	if product.seller == request.user or request.user.groups.all()[0].name != 'sellers':
+		if request.method == 'POST':
+			item_color_form = CreateItemColorForm(request.POST)
+			print(request.FILES)
+			if item_color_form.is_valid():
+				color = item_color_form.cleaned_data.get('color')
+				description = item_color_form.cleaned_data.get('description')
+				try:
+					image1 = request.FILES['image1']
+				except:
+					image1 = None
+				try:
+					image2 = request.FILES['image2']
+				except:
+					image2 = None
+				try:
+					image3 = request.FILES['image3']
+				except:
+					image3 = None
+				try:
+					image4 = request.FILES['image4']
+				except:
+					image4 = None
+
+				new_color = ItemColor(product=product,color=color,description=description,image1=image1,image2=image2,image3=image3,image4=image4)
+				new_color.save()
+				messages.success(request, f'{color} added for item {product.product_uid}')
+		else:
+			item_color_form = CreateItemColorForm(request.POST)
+
+		context = {
+			'product':product,
+			'item_color_form': item_color_form,
+			'colors': ItemColor.objects.filter(product=product)
+		}
+		return render(request, 'products/add_item_color.html', context)
+
+	messages.success(request, f'You accessed an unauthorized page!')
+	return redirect('staff-dashboard')
+
+@login_required
 def edit_damage(request, id):
 	damage = Damage.objects.get(id=id)
 	if damage.product.seller == request.user or request.user.groups.all()[0].name != 'sellers':
@@ -99,6 +142,54 @@ def edit_damage(request, id):
 
 
 @login_required
+def edit_item_color(request, id):
+	color = ItemColor.objects.get(id=id)
+	if color.product.seller == request.user or request.user.groups.all()[0].name != 'sellers':
+		if request.method == 'POST':
+			item_color_form = CreateItemColorForm(request.POST,request.FILES,instance=color)
+			if item_color_form.is_valid():
+				color_field = item_color_form.cleaned_data.get('color')
+				description = item_color_form.cleaned_data.get('description')
+				try:
+					image1 = request.FILES['image1']
+					color.image1 = image1
+				except:
+					print("Maintain image")
+				try:
+					image2 = request.FILES['image2']
+					color.image2 = image2
+				except:
+					print("Maintain image")
+				try:
+					image3 = request.FILES['image3']
+					color.image3 = image3
+				except:
+					print("Maintain image")
+				try:
+					image4 = request.FILES['image4']
+					color.image4 = image4
+				except:
+					print("Maintain image")
+
+				color.color = color_field
+				color.description = description
+				color.save()
+
+				messages.success(request, f'Color edited!')
+				return redirect('add-item-color', id=color.product.id)
+		item_color_form = CreateItemColorForm(instance=color)
+		context = {
+			'color':color,
+			'form': item_color_form
+		}
+
+		return render(request, 'products/edit_item_color.html', context)
+
+	messages.success(request, f'You accessed an unauthorized page!')
+	return redirect('staff-dashboard')
+
+
+@login_required
 def delete_damage(request, id):
 	damage = Damage.objects.get(id=id)
 	p_id = damage.product.id
@@ -114,6 +205,22 @@ def delete_damage(request, id):
 		messages.success(request, f'You accessed an unauthorized page!')
 		return redirect('staff-dashboard')
 
+
+@login_required
+def delete_item_color(request, id):
+	color = ItemColor.objects.get(id=id)
+	p_id = color.product.id
+	if color.product.seller == request.user or request.user.groups.all()[0].name != 'sellers':
+		try:
+			color.delete()
+			messages.success(request, f'Color deleted!')
+			return redirect('add-item-color', id=p_id)
+		except:
+			messages.success(request, f'Failed to delete color!')
+			return redirect('add-item-color', id=p_id)
+	else:
+		messages.success(request, f'You accessed an unauthorized page!')
+		return redirect('staff-dashboard')
 
 
 class CategoryDetailView(DetailView):

@@ -18,7 +18,7 @@
 		  	<form id="sellerAddItemForm" method="POST" enctype="multipart/form-data">
 				{% csrf_token %}
 				<fieldset class="form-group">
-					<legend class="mb-4"><i class="fas fa-plus-circle"></i> Add Damage to {{product.product_name}} ({{product.product_uid}})</legend>
+					<legend class="mb-4"><i class="fas fa-plus-circle"></i> Add Condition (Any breakages or damages) of {{product.product_name}} ({{product.product_uid}})</legend>
 					{{ damage_form|crispy }}
 				</fieldset>
 		    	<div class="form-group">
@@ -29,18 +29,18 @@
 	</div>
 	<div class="col-md-6">
 		<div class="bg-mattBlackLight my-2 p-3">
-	        <h4 class="text-center">All damages on this Item</h4>
+	        <h4 class="text-center">All conditions on this Item</h4>
 	        <table class="new-orders-table">
 	          <thead>
 	            <tr>
 	              <th>Image</th>
-	              <th>Damage description</th>
-	              <th>Edit Damage</th>
+	              <th>Condition description</th>
+	              <th>Edit condition</th>
 	            </tr>
 	          </thead>
 	          <tbody>
 	          	{% if damages|length < 1 %}
-	          		<h5 style="color: red;font-style: italic">No damages on this Product</h5>
+	          		<h5 style="color: red;font-style: italic">No condition on this Product</h5>
 	          	{% else %}
 		            {% for damage in damages %}
 		            	<tr>

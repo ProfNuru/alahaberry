@@ -64,9 +64,9 @@
           <thead>
             <tr>
               <th>Order ID</th>
-              <th>Seller</th>
-              <th>Item</th>
-              <th>To be Delivered by</th>
+              <th>Number of Items</th>
+              <th>Total Amount</th>
+              <th>View</th>
             </tr>
           </thead>
           <tbody>
@@ -78,50 +78,18 @@
               {% for pending_order in pending_orders %}
                 <tr>
                   <td>{{pending_order.id}}</td>
-                  <td><a style="color:turquoise;" href="#" data-toggle="modal" data-target="#orderedItemSellerModal">{{pending_order.product.seller.username}}</a></td>
-                  <td><a style="color:orange;" href="{% url 'view-product' pending_order.product.id pending_order.product.product_name %}">{{pending_order.product.product_name}}</a></td>
-                  <td>{{pending_order.delivered_by}}</td>
+                  <td>{{pending_order.number_of_items}}</td>
+                  <td>{{pending_order.total_amount}}</td>
+                  <td><a href="#" data-index="{{pending_order.id}}" class="view-order-details btn btn-secondary"><i class="fas fa-eye"></i></a></td>
                 </tr>
-
-                <div class="modal fade" id="orderedItemSellerModal" tabindex="-1" aria-labelledby="orderedItemSellerModalLabel" aria-hidden="true">
-                  <div class="modal-dialog">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="orderedItemSellerModalLabel">{{pending_order.product.seller.username}} Details</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body">
-                        <div class="seller-pic">
-                          {% if pending_order.product.seller.profile.image %}
-                            <img class="img-fluid" src="{{pending_order.product.seller.profile.image.url}}">
-                          {% endif %}
-                        </div>
-                        <div class="seller-profileinfo">
-                          <h5>Business name: {{pending_order.product.seller.profile.business_name}}</h5>
-                          <h5>Phone number: {{pending_order.product.seller.profile.phone_number}}</h5>
-                          <h5>E-mail: {{pending_order.product.seller.email}}</h5>
-                          {% if pending_order.product.seller.profile.handle_orders %}
-                            <h5 style="color:red;font-style:italic">Order to be handled by Seller</h5>
-                          {% else %}
-                            <h5 style="color:green;font-style:italic">Order to be handled by Alahaberry</h5>
-                          {% endif %}
-                        </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
               {% endfor %}
             {% endif %}
           </tbody>
         </table>
       </div>
     </div>
+  </div>
+  <div class="row">
     <div class="col-md-12 col-sm-12">
       <div class="bg-mattBlackLight my-2 p-3">                  
         <h4 class="text-center">All Orders</h4>
@@ -136,11 +104,9 @@
         <table class="items-table orders-list-table">
           <thead>
             <tr>
-              <th><i class="fas fa-list-ol"></i></th>
-              <th><i class="fas fa-user"></i> Item ID</th>
-              <th><i class="fas fa-file-signature"></i> Item</th>
-              <th><i class="fas fa-file-signature"></i> Customer</th>
-              <th><i class="fas fa-file-signature"></i> Contact</th>
+              <th>#</th>
+              <th><i class="fas fa-user"></i> Number of Items</th>
+              <th>Total Amount (GHC)</th>
               <th>Status</th>
               <th class="text-center">Action</th>
             </tr>
@@ -149,61 +115,61 @@
             {% for order in orders %}
               <tr>
                 <td>{{order.id}}</td>
-                <td>{{order.product.product_uid}}</td>
-                <td>{{order.product.product_name}}</td>
-                <td>{{order.name}}</td>
-                <td>{{order.phone}}</td>
-                <td class="text-center">
-                  {% if order.delivered %}
-                    <i style="font-size:26px;" class="fas fa-check-square" data-toggle="tooltip" data-placement="top" title="Delivered"></i>
-                  {% else %}
-                    <i style="font-size:26px;" class="fas fa-spinner" data-toggle="tooltip" data-placement="top" title="Pending"></i>
-                  {% endif %}
-                </td>
-                <td class="text-center">
-                  {% if user|has_group:"admins" or user|has_group:"clerks" %}
-                    {% if order.delivered %}
-                      <button class="btn btn-info" style="padding:1px 5px" disabled><i class="fas fa-eye"></i></button>
-                    {% else %}
-                      <button class="btn btn-info" style="padding:1px 5px" data-toggle="modal" data-target="#viewOrderModal{{order.id}}"><i class="fas fa-eye"></i></button>
-                    {% endif %}
-                  {% endif %}
-                </td>
+                <td>{{order.number_of_items}}</td>
+                <td>{{order.total_amount}}</td>
+                {% if order.delivered %}
+                  <td>Order delivered</td>
+                {% else %}
+                  <td>Pending</td>
+                {% endif %}
+                <td><a href="#" data-index="{{order.id}}" class="view-order-details btn btn-secondary"><i class="fas fa-eye"></i></a></td>
               </tr>
-              <!-- Modal -->
-              <div class="modal fade" id="viewOrderModal{{order.id}}" tabindex="-1" role="dialog" aria-labelledby="viewOrderModal{{order.id}}Label" aria-hidden="true">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="viewOrderModal{{order.id}}Label">Order details</h5>
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                      </button>
-                    </div>
-                    <div class="modal-body">
-                      <h5><span>Item Ordered:</span> {{order.product.product_uid}} {{order.product.product_name}}</h5>
-                      <h5><span>Customer Name:</span> {{order.name}}</h5>
-                      <h5><span>Customer Contact:</span> {{order.phone}}</h5>
-                      <h5><span>Customer E-mail:</span> {{order.email}}</h5>
-                      <h5>Message:</h5><p style="padding-left:20px;color:000; font-weight:bolder">{{order.order}}</p>
-                      <h6>Order made on: {{order.date_ordered}}</h6>
-                      <form method="POST" action="{% url 'deliver-order' %}">
-                        {% csrf_token %}
-                      <input type="hidden" name="order_id" value="{{order.id}}">
-                      <p>Click this button if item has been delivered: <button type="submit" class="btn btn-primary" style="padding:1px 5px"><i class="fas fa-check-double"></i></button></p>
-                      </form>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  </div>
-                </div>
-              </div>
             {% endfor %}
           </tbody>
         </table>
       </div>
     </div>
  	</div>
+
+<div id="order-details-modal" class="modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h4 style="color:#000">Customer Details:</h4>
+        <div id="buyer_details">
+          
+        </div>
+        <h5 style="color:#000"></h5>
+        <div class="table-responsive">
+          <table id="ordered-items-table" class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">Item ID</th>
+                <th scope="col">Quantity</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Seller Earning</th>
+                <th scope="col">Seller</th>
+              </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+          </table>
+        </div>
+        <div id="order-status"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock maincontent %}
 
 {% block JS %}

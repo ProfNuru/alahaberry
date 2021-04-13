@@ -2,20 +2,23 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.core import serializers
 from dateutil.relativedelta import relativedelta
 from django.db.models import Q
 
-from products.models import Product, Categorie, Order, Damage
+from products.models import Product, Categorie, Order, Damage, ItemRequest, SoldItem, ItemColor, ProductHit
 from users.models import Profile, AlahaBerrySetting
 from customers.models import Subscriber
 from ads.models import Advertisement
-from .forms import CreateOrderForm
+from .forms import CreateOrderForm, SubscriberForm, RequestForm, SoldItemForm
 
 import random
 import datetime
 import pytz
+import json
+import decimal
 
 
 def privacy_policy(request):
@@ -27,18 +30,42 @@ def terms_of_service(request):
 
 
 def homepage(request):
-	sellers = User.objects.filter(groups__name='sellers', profile__subscription_end__gt=timezone.now())
-	horizontal_ads = Advertisement.objects.filter(vertical=False)
-
+	categories = Categorie.objects.all()
 	context = {
-		'title': "Alahaberry | Buy and Sell anything",
-		'home_nav_active': 'activeNav',
-		'shops': sellers,
-		'products': Product.objects.select_related("seller").all(),
-		'popular_products': Product.objects.select_related("seller").filter(seller__profile__subscription_end__gt=timezone.now()),
-		'horizontal_ads': horizontal_ads
+		'categories':categories
 	}
-	return render(request,'alaha_market/homepage.html', context)
+	return render(request, 'alaha_market/homepage.html', context)
+
+
+def initialize_page(request):
+	if request.is_ajax():
+		products = Product.objects.select_related('category').all().order_by('?')
+		serialized_products = serializers.serialize('json', products)
+		return JsonResponse(serialized_products, safe=False, status=200)
+	return redirect('homepage')
+
+
+def item_damages(request):
+	if request.is_ajax():
+		item_id = int(request.GET['item_id'])
+		product_hits = ProductHit.objects.get(product__id=item_id)
+		product_hits.views += 1
+		product_hits.save()
+		
+		damages = Damage.objects.filter(product__id=item_id)
+		serialized_damages = serializers.serialize('json', damages)
+		return JsonResponse(serialized_damages, safe=False, status=200)
+
+	return redirect('homepage')
+
+
+def item_colors(request):
+	if request.is_ajax():
+		item_id = int(request.GET['item_id'])
+		colors = ItemColor.objects.filter(product__id=item_id)
+		serialized_colors = serializers.serialize('json',colors)
+		return JsonResponse(serialized_colors, safe=False, status=200)
+	return redirect('homepage')
 
 
 def all_products(request):
@@ -98,57 +125,18 @@ def used_products(request):
 	return render(request, 'alaha_market/used_products.html', context)
 
 
+@login_required
 def view_product(request, pk, productname):
 	product = Product.objects.select_related("seller").get(id=pk, product_name=productname)
-	if not request.user.is_authenticated:
-		try:
-			hit = product.product_hit
-			hit.views = hit.views + 1
-			hit.last_viewed = timezone.now()
-			hit.save()
-		except:
-			print("No product_hit object for product")
-
+	if request.user.groups.filter(name__in=['clerks','admins']).exists():
+		product.views += 1
+		product.save()
 	tags = product.tags
-	if request.method == 'POST':
-		order_form = CreateOrderForm(request.POST)
-		if order_form.is_valid():
-			name = order_form.cleaned_data.get('name')
-			email = order_form.cleaned_data.get('email')
-			phone = order_form.cleaned_data.get('phone')
-			order = order_form.cleaned_data.get('order')
-			recipient = order_form.cleaned_data.get('recipient')
-			closest_landmark = order_form.cleaned_data.get('closest_landmark')
-			area = order_form.cleaned_data.get('area')
-			house_number = order_form.cleaned_data.get('house_number')
-
-
-			if product.seller.profile.handle_orders:
-				new_order = Order(product=product,name=name,email=email,
-							phone=phone,order=order, delivered_by="Shop Owner",
-							recipient=recipient, closest_landmark=closest_landmark,
-							area=area, house_number=house_number)
-				new_order.save()
-			else:
-				new_order = Order(product=product,name=name,email=email,
-							phone=phone,order=order, delivered_by="Alahaberry Sales Persons",
-							recipient=recipient, closest_landmark=closest_landmark,
-							area=area, house_number=house_number)
-				new_order.save()
-
-
-			messages.success(request, f'You have successfully made an order for Item ID: {product.product_uid}')
-			return redirect('view-product', pk=pk, productname=productname)
-	else:
-		order_form = CreateOrderForm()
-
+	
 	context = {
 		'title': "Alahaberry | " + product.product_name,
 		'product': product,
 		'damages': Damage.objects.filter(product=product),
-		'order_form': order_form,
-		'same_category_products': Product.objects.filter(category=product.category),
-		'related_items': Product.objects.filter(Q(product_name__icontains=tags)|Q(product_desc__icontains=tags)|Q(tags__icontains=tags)),
 	}
 	return render(request, 'alaha_market/view_product.html', context)
 
@@ -194,16 +182,92 @@ def all_shops(request):
 	return render(request, 'alaha_market/all_shops.html', context)
 
 
-def subscribe(request):
-	if request.method == 'POST':
-		email = request.POST['subscriber-email']
-		subscription = Subscriber(email=email)
-		subscription.save()
-		
-		context = {
-			'title': "Alahaberry | Thank you for subscribing",
-			'products': Product.objects.select_related("seller").all().order_by('-id')
+def subscribe_to_newsletter(request):
+	if request.is_ajax():
+		sub_data = {
+			'email': request.POST['subscription_email']
 		}
-		return render(request, 'alaha_market/subscription_complete.html', context)
+		sub_form = SubscriberForm(sub_data)
+		if(sub_form.is_valid()):
+			sub_form.save()
+			return JsonResponse(json.dumps({'subscribed':True}), safe=False, status=200)
+	return redirect('homepage')
 
+
+def get_site_data(request):
+	if request.is_ajax():
+		site_data = AlahaBerrySetting.objects.all().values_list('application_name','about',
+			'address','contact1','contact2','contact3','email','google_map','region','city',
+			'facebook_url','instagram_url','twitter_url','google_url','linkedin_url','logo',
+			'cover_photo','favicon')
+		site_data_list = []
+		for i in site_data:
+			site_data_dict = {
+				'application_name':i[0],
+				'about':i[1],
+				'address':i[2],
+				'contact1':i[3],
+				'contact2':i[4],
+				'contact3':i[5],
+				'email':i[6],
+				'google_map':i[7],
+				'region':i[8],
+				'city':i[9],
+				'facebook_url':i[10],
+				'instagram_url':i[11],
+				'twitter_url':i[12],
+				'google_url':i[13],
+				'linkedin_url':i[14],
+				'logo':i[15],
+				'cover_photo':i[16],
+				'favicon':i[17]				
+			}
+			site_data_list.append(site_data_dict)
+		return JsonResponse(json.dumps(site_data_list), safe=False, status=200)
+	return redirect('homepage')
+
+
+def submit_order(request):
+	if request.is_ajax():
+		items_ordered = json.loads(request.POST['order_items'])
+
+		request_data = {
+			'customer_email': request.POST['cust_email'],
+			'customer_phone': request.POST['cust_phone'],
+			'number_of_items': len(items_ordered),
+			'total_amount': request.POST['total_amount']
+		}
+
+		request_form = RequestForm(request_data)
+
+		sell_rate = AlahaBerrySetting.objects.last()
+		request_success = True
+		if request_form.is_valid():
+			new_request = request_form.save()
+			for item in items_ordered:
+				item_ordered = {
+					'item': Product.objects.get(id=item['pk']),
+					'request': new_request,
+					'qty': item['qty'],
+					'amount': item['amount'],
+					'seller_earning': float(decimal.Decimal(decimal.Decimal(item['amount']) - (decimal.Decimal(item['amount']) * sell_rate.charges_on_sale)))
+				}
+				print(item_ordered)
+
+				sold_item_form = SoldItemForm(item_ordered)
+
+				if sold_item_form.is_valid():
+					print("Item sold")
+					sold_item_form.save()
+				else:
+					print("Item sale failed!")
+					request_success = False
+		else:
+			request_success = False
+
+		order_feedback = {
+			'order_placed': request_success
+		}
+		return JsonResponse(json.dumps(order_feedback), safe=False, status=200)
+	return redirect('homepage')
 

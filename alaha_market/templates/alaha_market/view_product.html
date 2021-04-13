@@ -1,4 +1,4 @@
-{% extends 'alaha_market/home_base.html' %}
+{% extends 'users/staff_base.html' %}
 {% load auth_extras %}
 {% load static %}
 {% load crispy_forms_tags %}
@@ -12,21 +12,12 @@
   <section id="productWrapper">
     <div class="product-landing-page row">
         <div class="product-title col-xl-5 col-md-5 col-sm-5 mr-auto">
-            <h4>Seller: {% if product.seller.profile.business_name != 'NA' %}
-                          {{ product.seller.profile.business_name }}
-                        {% else %}
-                          {{ product.seller.username }}
-                        {% endif %}
+            <h4>Seller: {{ product.seller.username }}
             </h4>
             {% if product.seller.profile.business_city %}
               <h5>Location: {{ product.seller.profile.business_city }}</h5>
             {% endif %}
             <h1>{{product.product_name}}</h1>
-        </div>
-        <div class="product-banner col-xl-5 col-md-5 col-sm-5 ml-auto">
-            <img src="{% if product.product_thumbnail %} 
-              {{ product.product_thumbnail.url }} 
-            {% endif %}">
         </div>
     </div>
 
@@ -74,17 +65,18 @@
             <hr class="horizontal-separator">
             {% if user.is_authenticated %}
               {% if user == product.seller %}
-                <a class="btn btn-outline-danger" href="{% url 'add-product-damage' product.id %}">Add Item Damages</a>
+                <a class="btn btn-outline-danger" href="{% url 'add-product-damage' product.id %}">Add Item Conditions</a>
                 <a class="btn btn-outline-primary" href="{% url 'update-product' product.id %}">Edit Item</a>
+                <a class="btn btn-outline-success" href="{% url 'add-item-color' product.id %}">Add Colors for Item</a>
+                
               {% else %}
                   {% if user|has_group:"admins" or user|has_group:"clerks" %}
-                    <a class="btn btn-outline-danger" href="{% url 'add-product-damage' product.id %}">Add Item Damages</a>
+                    <a class="btn btn-outline-danger" href="{% url 'add-product-damage' product.id %}">Add Item Conditions</a>
                     <a class="btn btn-outline-primary" href="{% url 'admin-item-edit' product.id %}">Edit Item</a>
                   {% endif %}
               {% endif %}
             {% endif %}
-              <a href="#" data-toggle="modal" data-target="#orderProductModal" id="buyBtn"><i class="fas fa-shopping-cart"></i> BUY NOW</a>
-            
+
             <p class="share-item">
                 <span class="share-title">Share</span>
                 <a class="col-md-1 mr-auto" href="#"><i class="fab fa-facebook-square"></i></a> 
@@ -97,7 +89,7 @@
     <div class="nav nav-tabs" id="nav-product-details" role="tablist">
       <a class="nav-link active" id="nav-desc-tab" data-toggle="tab" href="#nav-desc" role="tab" aria-controls="nav-desc" aria-selected="true">Description</a>
       <a class="nav-link" id="nav-details-tab" data-toggle="tab" href="#nav-details" role="tab" aria-controls="nav-details" aria-selected="false">Product Details</a>
-      <a class="nav-link" id="nav-damages-tab" data-toggle="tab" href="#nav-damages" role="tab" aria-controls="nav-damages" aria-selected="false">Damages</a>
+      <a class="nav-link" id="nav-damages-tab" data-toggle="tab" href="#nav-damages" role="tab" aria-controls="nav-damages" aria-selected="false">Conditions</a>
     </div>
     <div class="tab-content" id="nav-product-detailsContent">
       <div class="tab-pane fade show active" id="nav-desc" role="tabpanel" aria-labelledby="nav-desc-tab">
@@ -128,126 +120,8 @@
       </div>
     </div>
 
-    <!-- Related Items -->
-    <div id="related-items">
-      <h1>You Might also like</h1>
-      <div class="line-design"></div>
-      <ul id="relatedItemLightSlider">
-        {% for product in related_items %}
-        <li>
-          <div class="related-item">
-            <div class="itemSlideImg">
-              <img loading="lazy" src="{% if product.product_thumbnail %} {{product.product_thumbnail.url}} {% endif %}">
-            </div>
-            <h3 class="slideSellerName">
-              {% if product.seller.profile.business_name != 'NA' %} 
-                {{product.seller.profile.business_name}} 
-              {% else %}
-                {{product.seller.username}} 
-              {% endif %}
-            </h3>
-            <h1 class="slideItemName">{{product.product_name}}</h1>
-            <p class="starRating"></p>
-            <p class="item-price">
-              <span class="cancelled-price"></span>
-              <span class="new-price">GHC {{product.product_price}}</span>
-              <span class="discount"></span>
-            </p>
-            {% if product.brand_new %}
-              <span class="new_tag">
-                New
-              </span> 
-            {% else %}
-              <span class="used_tag">
-                Used
-              </span>
-            {% endif %}
-            <a class="btn btn-danger" href="#">BUY NOW</a>
-          </div>
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
-    <!-- ./Related Items -->
-
-    <!-- In the same category -->
-    <div id="same-category-items">
-      <h1>In the same category</h1>
-      <div class="line-design"></div>
-      <ul id="sameCategoryItemLightSlider">
-        {% for product in same_category_products %}
-        <li>
-          <div class="related-item">
-            <div class="itemSlideImg">
-              <img loading="lazy" src="{% if product.product_thumbnail %} {{product.product_thumbnail.url}} {% endif %}">
-            </div>
-            <h3 class="slideSellerName">
-              {% if product.seller.profile.business_name != 'NA' %} 
-                {{product.seller.profile.business_name}} 
-              {% else %}
-                {{product.seller.username}} 
-              {% endif %}
-            </h3>
-            <h1 class="slideItemName">{{product.product_name}}</h1>
-            <p class="starRating"></p>
-            <p class="item-price">
-              <span class="cancelled-price"></span>
-              <span class="new-price">GHC {{product.product_price}}</span>
-              <span class="discount"></span>
-            </p>
-            {% if product.brand_new %}
-              <span class="new_tag">
-                New
-              </span> 
-            {% else %}
-              <span class="used_tag">
-                Used
-              </span>
-            {% endif %}
-            <a class="btn btn-danger" href="#">BUY NOW</a>
-          </div>
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
-    <!-- ./In the same category -->
   </section>
 
-  <div class="modal fade" id="orderProductModal" tabindex="-1" role="dialog" aria-labelledby="orderProductModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="orderProductModalLabel">Make Order</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <h6>Order for:</h6>
-          <div class="item_to_buy">
-            <img src="{% if product.product_thumbnail %} 
-              {{ product.product_thumbnail.url }} 
-            {% endif %}">
-            <div class="item_to_buy_desc">
-              <h4>{{ product.product_name }}</h4>
-              <h5>Reference number: {{ product.product_uid }}</h5>
-              <h3>Price: GHC {{ product.product_price }}</h3>
-            </div>
-          </div>
-          <form method="POST">
-            {% csrf_token %}
-            <fieldset>
-              {{order_form|crispy}}
-            </fieldset>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button type="submit" class="btn btn-primary">Order</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
 {% endblock maincontent %}
 
 {% block JS %}

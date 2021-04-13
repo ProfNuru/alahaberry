@@ -7,13 +7,15 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import UpdateView, DeleteView
 from django.utils import timezone
+from django.core import serializers
 
 import datetime
 import pytz
 import decimal
 from dateutil.relativedelta import relativedelta
+import json
 
-from products.models import Product, Order, Categorie
+from products.models import Product, ProductHit, Order, Categorie, ItemRequest, SoldItem
 from products.forms import CreateProductForm
 from logs.models import Log
 from ads.models import Advertisement
@@ -68,12 +70,53 @@ def staff_dashboard(request):
 @staff_only
 def all_orders(request):
 	context = {
-		'orders': Order.objects.all(),
-		'pending_orders': Order.objects.filter(delivered=False),
-		'delivered_orders': Order.objects.filter(delivered=True),
-		'today': timezone.now()
+		'orders': ItemRequest.objects.all(),
+		'pending_orders': ItemRequest.objects.filter(delivered=False),
+		'delivered_orders': ItemRequest.objects.filter(delivered=True)
 	}
 	return render(request, 'users/all_orders.html', context)
+
+
+@login_required
+def get_order_details(request):
+	if request.is_ajax():
+		order_id = int(request.GET['order_id'].strip())
+		curr_order = ItemRequest.objects.get(id=order_id)
+		sell_rate = AlahaBerrySetting.objects.last()
+		items_list = []
+		ordered_items = SoldItem.objects.select_related('item','request').filter(request__id=order_id)
+		for item in ordered_items:
+			items_list.append({
+				'product_id':item.item.id,
+				'product_uid':item.item.product_uid,
+				'product_name':item.item.product_name,
+				'qty_ordered':item.qty,
+				'amount':float(item.amount),
+				'sell_cost':'{:.2f}'.format(float(item.seller_earning)),
+				'seller':item.item.seller.username,
+				'seller_id':item.item.seller.id
+			})
+
+		items_dict = {
+			'items_list':items_list,
+			'delivered':curr_order.delivered,
+			'customer_email':curr_order.customer_email,
+			'customer_phone':curr_order.customer_phone
+		}
+		json_items = json.dumps(items_dict)
+		return JsonResponse(json_items, safe=False, status=200)
+	return redirect('all-orders')
+
+
+@login_required
+def make_delivery(request):
+	if request.is_ajax():
+		order_id = int(request.GET['order_id'].strip())
+		order = ItemRequest.objects.get(id=order_id)
+		order.delivered = True
+		order.save()
+		return JsonResponse(json.dumps({'delivered':True}), safe=False, status=200)
+	return redirect('all-orders')
 
 
 @login_required
@@ -91,8 +134,6 @@ def deliver_order(request):
 			new_commission = Commission(coupon=order_to_deliver.product.seller.coupon,
 							commission=commission,subscriber=order_to_deliver.product.seller)
 			new_commission.save()
-
-
 		order_to_deliver.save()
 
 		messages.success(request, f'Order for {order_to_deliver.product.product_uid} delivered to {order_to_deliver.name}!')
@@ -154,10 +195,16 @@ def user_dashboard(request):
 	if request.user.coupon.expiry_date > current_datetime:
 		affiliated = True
 
+	pdts = Product.objects.filter(seller=request.user)
+	item_hits = 0
+	for p in pdts:
+		item_hits += p.product_hit.views
+
 	context = {
 		'subscriptions': Subscription.objects.filter(user=request.user),
-		'products': Product.objects.filter(seller=request.user),
+		'products': pdts,
 		'subbed': subbed,
+		'item_hits':item_hits,
 		'affiliated': affiliated,
 		'orders': Order.objects.filter(product__seller=request.user, delivered=False)
 	}
@@ -293,6 +340,61 @@ def manage_users(request):
 
 @login_required
 @allowed_users(allowed_roles=['admins'])
+def item_sales(request):
+	sales = SoldItem.objects.all()
+	total_sales_amt = 0
+	total_paid_amt = 0
+	total_unpaid_amt = 0
+	for sale in sales:
+		total_sales_amt += sale.amount
+		if sale.payment_made:
+			total_paid_amt += sale.seller_earning
+		else:
+			total_unpaid_amt += sale.seller_earning
+
+	context = {
+		'total_sales_amt':total_sales_amt,
+		'total_paid_amt':total_paid_amt,
+		'total_unpaid_amt':total_unpaid_amt,
+		'sales': sales
+	}
+	return render(request, 'users/item_sales.html',context)
+
+
+@login_required
+@allowed_users(allowed_roles=['admins','sellers'])
+def individual_sales(request):
+	sales = SoldItem.objects.filter(item__seller=request.user)
+	total_sales_amt = 0
+	total_paid_amt = 0
+	total_unpaid_amt = 0
+	for sale in sales:
+		total_sales_amt += sale.amount
+		if sale.payment_made:
+			total_paid_amt += sale.seller_earning
+		else:
+			total_unpaid_amt += sale.seller_earning
+
+	context = {
+		'total_sales_amt':total_sales_amt,
+		'total_paid_amt':total_paid_amt,
+		'total_unpaid_amt':total_unpaid_amt,
+		'sales': sales
+	}
+	return render(request, 'users/individual_sales.html',context)
+
+
+
+@login_required
+@allowed_users(allowed_roles=['admins'])
+def make_payment_to_seller(request,s_id):
+	sale = SoldItem.objects.get(id=s_id)
+	sale.payment_made = True
+	sale.save()
+	return redirect('item-sales')
+
+@login_required
+@allowed_users(allowed_roles=['admins'])
 def manage_clerks(request):
 	clerks = User.objects.filter(groups__name='clerks')
 	context = {
@@ -339,7 +441,7 @@ def profile(request):
 
 	else:
 		u_form = UserUpdateForm(instance=request.user)
-		p_form = ProfileUpdateForm(instance=request.user.profile,check_sales_person=check_sales_person)
+		p_form = ProfileUpdateForm(instance=request.user.profile)
 
 	
 	context = {
@@ -353,7 +455,7 @@ def profile(request):
 
 
 @login_required
-@allowed_users(allowed_roles=['admins','affiliates'])
+@allowed_users(allowed_roles=['admins','clerks'])
 def seller_profile(request,name):
 	seller = User.objects.get(username=name)
 	context = {
@@ -484,7 +586,7 @@ class DeleteAdView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin,
 class AlahaBerrySettingUpdateView(LoginRequiredMixin, UserPassesTestMixin, SuccessMessageMixin, UpdateView):
 	model = AlahaBerrySetting
 	template_name = 'users/general_settings.html'
-	fields = ['application_name','about','logo','favicon',
+	fields = ['application_name','about','logo','cover_photo','favicon',
 			'address','contact1','contact2','contact3','email',
 			'google_map','region','city','facebook_url','twitter_url',
 			'instagram_url','linkedin_url','google_url','charges_on_sale',
