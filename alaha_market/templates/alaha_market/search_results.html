@@ -1,0 +1,99 @@
+{% extends 'alaha_market/base2.html' %}
+{% load static %}
+
+{% block keywords %}
+  {% for product in search_results %}
+  	{{product.product_name}},
+  {% endfor %}
+{% endblock keywords %}
+
+
+{% block CSS %}
+	<!-- Search Results CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/search-results.css' %}">	
+{% endblock CSS %}
+
+{% block maincontent %}
+	<div class="landing-grid-container">
+	  <div class="categories-links box-shadow">
+	    <h6>Categories</h6>
+	    {% for category in categories %}
+	      <a href="{% url 'category-page' category.id %}">{{category.category_name}}</a>
+	    {% endfor %}
+	  </div>
+		<div class="carousel-div results-div">
+			<h5 class="results-heading">SEARCH RESULTS | SHOWING {{number_of_results}} RESULTS</h5>
+			<div class="main-search-results row">
+				<!-- Main Results -->
+				{% if number_of_results %}
+				    {% for product in search_results %}
+				      <a href="{% url 'view-product' product.id product.product_name %}" class="product-thumb col-6 col-sm-4 col-md-4 col-xl-3">
+				      	<img loading="lazy" src="
+				                        {% if product.product_thumbnail %}
+				                          {{ product.product_thumbnail.url }}
+				                        {% elif product.product_image1 %}
+				                          {{ product.product_image1.url }}
+				                        {% elif product.product_image2 %}
+				                          {{ product.product_image2.url }}
+				                        {% elif product.product_image3 %}
+				                          {{ product.product_image3.url }}
+				                        {% endif %}
+				                        ">
+					      <div class="item-description">
+					        <h6>{{product.product_name}}</h6>
+					        <h5>GHS {{product.product_price}}</h5>
+					      </div>
+				      </a>
+					{% endfor %}	
+				{% else %}
+					<div class="no-results col-12 col-sm-12 col-md-12 col-xl-12">
+						No results found for your search...
+					</div>
+				{% endif %}
+			</div>
+
+	    </div>
+
+	  <div class="popular-items">
+	    <h2>Top Picks</h2>
+	    <div class="popular-items-slider">
+	      <div class="glide">
+	        <div class="glide__track" data-glide-el="track">
+	          <ul class="glide__slides">
+	            {% for pick in top_picks %}
+	              <li class="glide__slide">
+	                <a href="{% url 'view-product' pick.product.id pick.product.product_name %}" class="product-thumb">
+	                  <img loading="lazy" src="
+	                    {% if pick.product.product_thumbnail %}
+	                      {{ pick.product.product_thumbnail.url }}
+	                    {% elif pick.product.product_image1 %}
+	                      {{ pick.product.product_image1.url }}
+	                    {% elif pick.product.product_image2 %}
+	                      {{ pick.product.product_image2.url }}
+	                    {% elif pick.product.product_image3 %}
+	                      {{ pick.product.product_image3.url }}
+	                    {% endif %}
+	                  ">
+	                  <div class="item-description">
+	                    <h6>{{pick.product.product_name}}</h6>
+	                    <h5>GHS {{pick.product.product_price}}</h5>
+	                  </div>
+	                </a>
+	              </li>
+	            {% endfor %}
+	          </ul>
+	        </div>
+	        
+	        <div class="glide__arrows" data-glide-el="controls">
+	          <button class="glide__arrow glide__arrow--left left-arrow" data-glide-dir="<"><i class="fas fa-chevron-left"></i></button>
+	          <button class="glide__arrow glide__arrow--right right-arrow" data-glide-dir=">"><i class="fas fa-chevron-right"></i></button>
+	        </div>
+	      </div>   
+	    </div>
+	  </div>
+	</div>
+{% endblock maincontent %}
+
+{% block JS %}
+	<script src="{% static 'alaha_market/js/landing-carousel.js' %}"></script>
+{% endblock JS %}

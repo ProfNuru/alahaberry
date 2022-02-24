@@ -192,10 +192,31 @@
             </div>
           </div>
           <div class="modal-footer">
+            <button id="share-item" class="btn btn-outline-primary" data-toggle="modal" data-target="#showLinkModal">SHARE</button>
             <button type="button" id="buy-item-from-modal" class="btn btn-danger" data-dismiss="modal">Buy NOW</button>
             <button type="button" class="btn btn-success modal-add-to-cart-btn">Add to Cart</button>
             <input type="hidden" id="item-to-add" value="0">
         </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Item Link Modal -->
+    <div class="modal fade" id="showLinkModal" tabindex="-1" aria-labelledby="showLinkModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="showLinkModalLabel">Copy Link Below and Share</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Shareable link
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
         </div>
       </div>
     </div>

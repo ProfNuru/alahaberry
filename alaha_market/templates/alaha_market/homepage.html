@@ -1,1 +1,104 @@
-{% extends 'alaha_market/new_base.html' %}
+{% extends 'alaha_market/base2.html' %}
+{% load static %}
+{% block keywords %}
+  Buy, Sell, Tamale, Ghana, Sell items,
+{% endblock keywords %}
+
+{% block title %}
+  Alahaberry Marketplace | BUY and SELL Anything Online      
+{% endblock title %}
+
+{% block maincontent %}
+  <div class="landing-grid-container">
+    <div class="categories-links box-shadow">
+      <h6>Categories</h6>
+      {% for category in categories %}
+        <a href="{% url 'category-page' category.id %}">{{category.category_name}}</a>
+      {% endfor %}
+    </div>
+    
+      <div class="carousel-div">
+        <div id="landing-carousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-indicators">
+            <button type="button" data-bs-target="#landing-carousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#landing-carousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#landing-carousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+          </div>
+          <div class="carousel-inner">
+            {% for slide in slides %}
+              <div class="carousel-item 
+                {% if forloop.counter == 1 %}
+                  active
+                {% endif %}
+              ">
+                <img src="
+                  {% if slide.slide_image %}
+                    {{ slide.slide_image.url }}
+                  {% endif %}
+                " class="d-block w-100" height="300px" alt="Slide 1">
+                <div class="carousel-caption">
+                  <h5><a href="{% url 'register' %}" style="padding:0px;padding-bottom:15px"><span style="color:aliceblue;font-size:10px">Click here to</span><br>SELL ITEM</a></h5>
+                  <p>Sign up NOW and start selling on Alahaberry</p>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="register-div box-shadow">
+        <a href="{% url 'register' %}">Sell Now</a>
+        <p>Sign up NOW and start selling on Alahaberry</p>
+        <hr>
+        <h6>Need help?</h6>
+        <p><i class="fas fa-phone"></i> {{app_setting.contact1}}</p>
+        <p><i class="fas fa-envelope"></i> {{app_setting.email}}</p>
+      </div>
+      <div class="discounts-div">
+        
+      </div>    
+    
+    <div class="popular-items">
+      <h2>Top Picks</h2>
+      <div class="popular-items-slider">
+        <div class="glide">
+          <div class="glide__track" data-glide-el="track">
+            <ul class="glide__slides">
+              {% for pick in top_picks %}
+                <li class="glide__slide">
+                  <a href="{% url 'view-product' pick.product.id pick.product.product_name %}" class="product-thumb">
+                    <img loading="lazy" src="
+                      {% if pick.product.product_thumbnail %}
+                        {{ pick.product.product_thumbnail.url }}
+                      {% elif pick.product.product_image1 %}
+                        {{ pick.product.product_image1.url }}
+                      {% elif pick.product.product_image2 %}
+                        {{ pick.product.product_image2.url }}
+                      {% elif pick.product.product_image3 %}
+                        {{ pick.product.product_image3.url }}
+                      {% endif %}
+                    ">
+                    <div class="item-description">
+                      <h6>{{pick.product.product_name}}</h6>
+                      <h5>GHS {{pick.product.product_price}}</h5>
+                    </div>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+          
+          <div class="glide__arrows" data-glide-el="controls">
+            <button class="glide__arrow glide__arrow--left left-arrow" data-glide-dir="<"><i class="fas fa-chevron-left"></i></button>
+            <button class="glide__arrow glide__arrow--right right-arrow" data-glide-dir=">"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>   
+      </div>
+    </div>
+  </div>
+
+
+{% endblock maincontent %}
+
+{% block JS %}
+    <script src="{% static 'alaha_market/js/landing-carousel.js' %}"></script>
+{% endblock JS %}

@@ -9,6 +9,7 @@ from affiliations.models import Coupon
 
 from .models import Profile
 
+
 #Send signal when User is created
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):

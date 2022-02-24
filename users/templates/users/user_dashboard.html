@@ -60,7 +60,7 @@
 		        {% endif %}
 		        <div class="manage-items">
 		          <input type="text" name="filter" id="filter-items" class="form-control" placeholder="Filter Items">
-		          <button onclick='window.location.href="/user_dashboard/add_product/"' class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Add Item</button>
+		          <a href="{% url 'create-product' %}" class="btn btn-secondary"><i class="fas fa-plus-circle"></i> Add Item</a>
 
 		        </div>
 		        <table class="items-table">

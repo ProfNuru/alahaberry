@@ -107,6 +107,7 @@ function show_item_modal(e){
         }
         load_item_damages(item_id);
         load_item_colors(item_id);
+        add_shareable_link(item_id);
         $("#showItemModal").modal('show');
         $(".other-img .item-thumbnails").on("click", select_image);
         $("#buy-item-from-modal").on("click", buy_item_from_modal)
@@ -246,6 +247,13 @@ function show_item_modal(e){
                 }
             });
         }
+
+
+        function add_shareable_link(item_id){
+            console.log(window.location.origin);
+            item_link = window.location.origin + '/?item-id='+item_id;
+            $("#showLinkModal .modal-body").html("<p style='font-weight:bolder;color:#000;'><em>"+item_link+"</em></p>")
+        }
 	}
 }
 
@@ -253,6 +261,7 @@ function show_item_modal(e){
 function get_all_items(){
     // Check if search has been made
     var search_term = getUrlParameter("search-field");
+    var linked_item_id = getUrlParameter("item-id");
     if(search_term == undefined){
         search_term = "";
     }else{
@@ -334,6 +343,193 @@ function get_all_items(){
 			$(".card").on("click", show_item_modal);
         }
     });
+
+    if(linked_item_id != undefined){
+        if(isNaN(linked_item_id)){
+            console.log("Invalid query");
+        }else{
+            show_selected_item(linked_item_id);
+        }
+    }else{
+        console.log("Invalid query!");
+    }
+
+    function show_selected_item(item_id){
+        var all_items = JSON.parse(localStorage.getItem('alahaberry_products'));
+        for(var i=0; i<all_items.length; i++){
+            if(all_items[i].pk == parseInt(item_id)){
+                $(".modal-body .item-gallery .selected-img").html('<img class="item-thumbnails" src="media/'+
+                    all_items[i].fields.product_thumbnail+'" class="img-fluid">');
+                var images_html = "<img class='item-thumbnails' src='media/"+
+                    all_items[i].fields.product_thumbnail+"'>";
+                if(all_items[i].fields.product_image1.length > 0){
+                    images_html += "<img class='item-thumbnails' src='media/"+
+                    all_items[i].fields.product_image1+"'>";
+                }
+                if(all_items[i].fields.product_image2.length > 0){
+                    images_html += "<img class='item-thumbnails' src='media/"+
+                    all_items[i].fields.product_image2+"'>";
+                }
+                if(all_items[i].fields.product_image3.length > 0){
+                    images_html += "<img class='item-thumbnails' src='media/"+
+                    all_items[i].fields.product_image3+"'>";
+                }
+                $(".modal-body .item-gallery .other-img").html(images_html);
+                $(".modal-body .item-description .item-title").text(all_items[i].fields.product_name);
+                $(".modal-body .item-description .about-item").text(all_items[i].fields.product_desc);
+                $(".modal-body .item-description .item-cost .value").text(all_items[i].fields.product_price);
+                $("#item-to-add").val(all_items[i].pk);
+            }
+        }
+        load_item_damages(item_id);
+        load_item_colors(item_id);
+        add_shareable_link(item_id);
+        $("#showItemModal").modal('show');
+        $(".other-img .item-thumbnails").on("click", select_image);
+        $("#buy-item-from-modal").on("click", buy_item_from_modal)
+
+        function select_image(e){
+            $(e.target).addClass("img-fluid");
+            clicked_img = e.target.outerHTML;
+            $(".selected-img").html(clicked_img);
+        }
+
+        function buy_item_from_modal(){
+            let item_id = $("#item-to-add").val();
+            var all_items = JSON.parse(localStorage.getItem('alahaberry_products'));
+            for(var i=0; i<all_items.length; i++){
+                if(all_items[i].pk == parseInt(item_id)){
+                    cart_item = all_items[i];
+                    cart_item['qty'] = 1;
+                    cart_item['amount'] = all_items[i].fields.product_price;
+                    let cart = [all_items[i]];
+
+                    localStorage.setItem('alahaberry_shopping_cart', JSON.stringify(cart));
+                    load_shopping_cart();
+                    submit_order();
+                }
+            }
+        }
+
+        function load_item_damages(item_id){
+            $.ajax({
+                url: 'item_damages/',
+                type: 'get',
+                data: {'item_id':item_id},
+                success: function(response){
+                    item_conditions = JSON.parse(response);
+
+                    if(item_conditions.length <= 0){
+                        $("#conditions-list").html('<div class="alert alert-success" role="alert">'+
+                            '<b>Item in Perfect Condition</b></div>');
+                        return;
+                    }
+                    $("#conditions-list").html("");
+                    for(var c=0; c <= item_conditions.length; c++){
+                        if(item_conditions[c]){
+                            $("#conditions-list").append('<li class="media">'+
+                                '<img src="media/'+item_conditions[c].fields.image+
+                                '" class="align-self-start mr-3" alt="Condition photo" style="max-width:250px">'+
+                                '<div class="media-body">'+
+                                '<p style="font-weight:bolder">'+item_conditions[c].fields.description+
+                                '</p></div>'+
+                                '</li><hr>');
+                            }
+                    }
+                }
+            });
+        }
+
+        function load_item_colors(item_id){
+            $.ajax({
+                url: 'item_colors/',
+                type: 'get',
+                data: {item_id:item_id},
+                success:function(response){
+                    item_colors = JSON.parse(response);
+
+                    if(item_colors.length <= 0){
+                        $("#colors_checkboxes").html("No colors or types for item");
+                        return;
+                    }
+                    $("#colors_checkboxes").html('<h5>SELECT COLORS/TYPES</h5><div class="form-check">'+
+                                        '<input class="form-check-input" type="radio"'+
+                                        ' name="item_color" id="default" value="0" checked>'+
+                                        '<label class="form-check-label" for="default">'+
+                                        'Default</label></div>');
+                    for(var e = 0; e <= item_colors.length; e++){
+                        if(item_colors[e]){
+                            $("#colors_checkboxes").append('<div class="form-check">'+
+                                        '<input class="form-check-input" type="radio"'+
+                                        ' name="item_color" id="color'+item_colors[e].pk.toString()+
+                                        '" value="'+item_colors[e].pk.toString()+'">'+
+                                        '<label class="form-check-label" for="color'+
+                                        item_colors[e].pk.toString()+'">'+item_colors[e].fields.color+
+                                        '</label></div>');
+                        }
+                    }
+                    $('input[type=radio][name=item_color]').on('change', function() {
+                      if($(this).val() == "0"){
+
+                        for(var i=0; i<all_items.length; i++){
+                            if(all_items[i].pk == parseInt(item_id)){
+                                $(".modal-body .item-gallery .selected-img").html('<img class="item-thumbnails" src="media/'+
+                                    all_items[i].fields.product_thumbnail+'" class="img-fluid">');
+                                var image_html = "<img class='item-thumbnails' src='media/"+
+                                    all_items[i].fields.product_thumbnail+"'>";
+                                if(all_items[i].fields.product_image1.length > 0){
+                                    image_html += "<img class='item-thumbnails' src='media/"+
+                                    all_items[i].fields.product_image1+"'>";
+                                }
+                                if(all_items[i].fields.product_image2.length > 0){
+                                    image_html += "<img class='item-thumbnails' src='media/"+
+                                    all_items[i].fields.product_image2+"'>";
+                                }
+                                if(all_items[i].fields.product_image3.length > 0){
+                                    image_html += "<img class='item-thumbnails' src='media/"+
+                                    all_items[i].fields.product_image3+"'>";
+                                }
+                                $(".modal-body .item-gallery .other-img").html(image_html);
+                                $(".other-img .item-thumbnails").on("click", select_image);
+                            }
+                        }
+                      }else{
+                        for(var f = 0; f <= item_colors.length; f++){
+                            if(item_colors[f] && $(this).val() == item_colors[f].pk){
+                                $(".modal-body .item-gallery .selected-img").html('<img class="item-thumbnails" src="media/'+
+                                    item_colors[f].fields.image1+'" class="img-fluid">');
+                                var colors_img = "<img class='item-thumbnails' src='media/"+
+                                    item_colors[f].fields.image1+"'>";
+                                if(item_colors[f].fields.image2.length > 0){
+                                    colors_img += "<img class='item-thumbnails' src='media/"+
+                                        item_colors[f].fields.image2+"'>";
+                                }
+                                if(item_colors[f].fields.image3.length > 0){
+                                    colors_img += "<img class='item-thumbnails' src='media/"+
+                                        item_colors[f].fields.image3+"'>";
+                                }
+                                if(item_colors[f].fields.image4.length > 0){
+                                    colors_img += "<img class='item-thumbnails' src='media/"+
+                                        item_colors[f].fields.image4+"'>";
+                                }
+
+                                $(".modal-body .item-gallery .other-img").html(colors_img);
+                                $(".other-img .item-thumbnails").on("click", select_image);
+                            }
+                        }
+
+                      }
+                    });
+                }
+            });
+        }
+
+        function add_shareable_link(item_id){
+            console.log(window.location.origin);
+            item_link = window.location.origin + '/?item-id='+item_id;
+            $("#showLinkModal .modal-body").html("<p style='font-weight:bolder;color:#000;'><em>"+item_link+"</em></p>")
+        }
+    }
 }
 
 
@@ -553,8 +749,8 @@ function place_order(e){
     }
 
     $.ajax({
-        url: $("#order_form").attr('method'),
-        type: $("#order_form").attr('action'),
+        url: $("#order_form").attr('action'),
+        type: $("#order_form").attr('method'),
         data: prepared_data,
         dataType: "json",
         success: function(data){

@@ -1,129 +1,121 @@
-{% extends 'users/staff_base.html' %}
-{% load auth_extras %}
+{% extends 'alaha_market/base2.html' %}
 {% load static %}
-{% load crispy_forms_tags %}
+
+{% block keywords %}
+  {% for product in search_results %}
+    {{ product.product_name }},
+  {% endfor %}
+{% endblock keywords %}
+
+
+{% block title %}
+  {{ product.product_name }} | Alahaberry Marketplace
+{% endblock title %}
 
 
 {% block CSS %}
-  <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/view_product.css' %}">
+  <!-- Search Results CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/product-page.css' %}"> 
 {% endblock CSS %}
 
+{% block productPageCategories %}
+  <div class="dropdown">
+    <a class="btn dropdown-toggle box-shadow" href="#" role="button" id="categories-dropwdown" data-bs-toggle="dropdown" aria-expanded="false">
+      Categories
+    </a>
+
+    <ul class="dropdown-menu" aria-labelledby="categories-dropwdown">
+      {% for category in categories %}
+        <li><a class="dropdown-item" href="{% url 'category-page' category.id %}">{{category.category_name}}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock productPageCategories %}
+
 {% block maincontent %}
-  <section id="productWrapper">
-    <div class="product-landing-page row">
-        <div class="product-title col-xl-5 col-md-5 col-sm-5 mr-auto">
-            <h4>Seller: {{ product.seller.username }}
-            </h4>
-            {% if product.seller.profile.business_city %}
-              <h5>Location: {{ product.seller.profile.business_city }}</h5>
+
+  <!-- Product details -->
+  <div class="product-container">
+    <div class="product-image box-shadow">
+      <div class="product-thumbs">
+        {% if product.product_thumbnail %}
+          <img src="{{product.product_thumbnail.url}}">
+        {% endif %}
+        {% if product.product_image1 %}
+          <img src="{{product.product_image1.url}}">
+        {% endif %}
+        {% if product.product_image2 %}
+          <img src="{{product.product_image2.url}}">
+        {% endif %}
+        {% if product.product_image3 %}
+          <img src="{{product.product_image3.url}}">
+        {% endif %}
+      </div>
+      <div class="selected-img">
+        {% if product.product_thumbnail %}
+          <img src="{{product.product_thumbnail.url}}">
+        {% endif %}
+      </div>
+    </div>
+    <div class="product-details box-shadow">
+      <h3>{{ product.product_name }}</h3>
+      <h5>Product Specs</h5>
+      <h4><span class="currency">GHS</span> {{ product.product_price }}</h4>
+      <h6>Description</h6>
+      <p>{{ product.product_desc }}</p>
+
+      <ul>
+        {% for damage in damages %}
+          <li>{{damage.description}} 
+            {% if damage.image %}
+              <a href="#"><img class="damage-image" width="60px" height="60px" src="{{damage.image.url}}"></a>
+            {% else %}
+              No image to show
             {% endif %}
-            <h1>{{product.product_name}}</h1>
-        </div>
-    </div>
+          </li>
+        {% endfor %}
+      </ul>
 
-    <div class="product-details row">
-        <div class="image-holder col-xl-5 col-md-5 col-sm-12">
-            <div class="selected-img">
-                <img src="{% if product.product_thumbnail %} 
-                  {{ product.product_thumbnail.url }} 
-                {% endif %}">
-            </div>
-            <div class="product-thumbs">
-                <div class="thumbnail selected-thumb">
-                    <img src="{% if product.product_thumbnail %} 
-                      {{ product.product_thumbnail.url }} 
-                    {% endif %}">
-                </div>
-                <div class="thumbnail">
-                    <img src="{% if product.product_image1 %} 
-                      {{ product.product_image1.url }} 
-                    {% endif %}">
-                </div>
-                <div class="thumbnail">
-                    <img src="{% if product.product_image2 %} 
-                      {{ product.product_image2.url }} 
-                    {% endif %}">
-                </div>
-                <div class="thumbnail">
-                    <img src="{% if product.product_image3 %} 
-                      {{ product.product_image3.url }} 
-                    {% endif %}">
-                </div>
-            </div>
+      <p class="qty-title">Quantity</p>
+      <div class="edit-qty">
+        <div class="edit-wrap">
+          <div class="minus"><i class="fas fa-minus"></i></div>
+          <div class="qty-value"><span>1</span></div>
+          <div class="add"><i class="fas fa-plus"></i></div>
         </div>
-        <div class="product-description col-xl-7 col-md-7 col-sm-12">
-            <h1>{{product.product_name}}</h1>
-            <p id="productRef"><span>Reference:</span> {{product.product_uid}}</p>
-            <h2 class="product-price">
-                <!--<span class="old-price">GHC 11.99</span>-->
-                <span class="new-price">GHC {{product.product_price}}</span>
-                <!--<span class="discount-percent">Save 15%</span>-->
-            </h2>
-            <p id="full-item-description">
-                {{product.product_desc}}
-            </p>
-            <hr class="horizontal-separator">
-            {% if user.is_authenticated %}
-              {% if user == product.seller %}
-                <a class="btn btn-outline-danger" href="{% url 'add-product-damage' product.id %}">Add Item Conditions</a>
-                <a class="btn btn-outline-primary" href="{% url 'update-product' product.id %}">Edit Item</a>
-                <a class="btn btn-outline-success" href="{% url 'add-item-color' product.id %}">Add Colors for Item</a>
-                
-              {% else %}
-                  {% if user|has_group:"admins" or user|has_group:"clerks" %}
-                    <a class="btn btn-outline-danger" href="{% url 'add-product-damage' product.id %}">Add Item Conditions</a>
-                    <a class="btn btn-outline-primary" href="{% url 'admin-item-edit' product.id %}">Edit Item</a>
-                  {% endif %}
-              {% endif %}
-            {% endif %}
-
-            <p class="share-item">
-                <span class="share-title">Share</span>
-                <a class="col-md-1 mr-auto" href="#"><i class="fab fa-facebook-square"></i></a> 
-                <a class="col-md-1 mr-auto" href="#"><i class="fab fa-twitter-square"></i></a> 
-                <a class="col-md-1 mr-auto" href="#"><i class="fab fa-instagram"></i></a>
-            </p>
-        </div>
-    </div>
-
-    <div class="nav nav-tabs" id="nav-product-details" role="tablist">
-      <a class="nav-link active" id="nav-desc-tab" data-toggle="tab" href="#nav-desc" role="tab" aria-controls="nav-desc" aria-selected="true">Description</a>
-      <a class="nav-link" id="nav-details-tab" data-toggle="tab" href="#nav-details" role="tab" aria-controls="nav-details" aria-selected="false">Product Details</a>
-      <a class="nav-link" id="nav-damages-tab" data-toggle="tab" href="#nav-damages" role="tab" aria-controls="nav-damages" aria-selected="false">Conditions</a>
-    </div>
-    <div class="tab-content" id="nav-product-detailsContent">
-      <div class="tab-pane fade show active" id="nav-desc" role="tabpanel" aria-labelledby="nav-desc-tab">
-        <p>
-            {{product.product_desc}}
-        </p>
       </div>
-      <div class="tab-pane fade" id="nav-details" role="tabpanel" aria-labelledby="nav-details-tab">
-        <p>
-          {{product.product_details}}
-        </p>
-      </div>
-      <div class="tab-pane fade" id="nav-damages" role="tabpanel" aria-labelledby="nav-damages-tab">
-        <ul class="list-unstyled col-md-12">
-          {% for damage in damages %}
-            <li class="media row">
-              <div class="damage-img col-md-4">
-                <a href="{% if damage.image %} {{damage.image.url}} {% endif %}"><img src="{% if damage.image %} {{damage.image.url}} {% endif %}" class="mr-3" alt="item-image" style="max-width: 250px"></a>
-              </div>
-              <div class="media-body col-md-6 mr-auto">
-                <p class="mt-0 mb-1">
-                    {{damage.description}}
-                </p>
-              </div>
-            </li>
-          {% endfor %}
-        </ul>
+      <input type="hidden" name="product_id" id="p_id" value="{{product.id}}">
+
+      <div class="product-action-buttons">
+        <a id="buy-now-btn" href="#" class="btn">BUY NOW</a>
+        <a id="add-to-cart-btn" href="#" class="btn">ADD TO CART</a>
+        <a id="share-btn" href="#" class="btn" data-bs-toggle="modal" data-bs-target="#share-btnModal">SHARE</a>
       </div>
     </div>
+  </div>
 
-  </section>
+<!-- Modal -->
+<div class="modal fade" id="share-btnModal" tabindex="-1" aria-labelledby="share-btnModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="share-btnModalLabel">Copy Link below and Share!</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <a target="_blank" href="{% url 'view-product' product.id product.product_name %}">
+          https://www.alahaberry.com{% url 'view-product' product.id product.product_name %}
+        </a>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% endblock maincontent %}
 
 {% block JS %}
-  <script src="{% static 'alaha_market/js/view_product.js' %}"></script>
+  <script src="{% static 'alaha_market/js/select-image.js' %}"></script>
 {% endblock JS %}

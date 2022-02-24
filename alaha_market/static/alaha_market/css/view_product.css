@@ -94,6 +94,10 @@
 .horizontal-separator{
 	color: #aaa;
 }
+.product-action-buttons{
+	display: flex;
+	justify-content: space-between;
+}
 .product-description #buyBtn{
 	display: inline-block;
 	background: #ff0000;

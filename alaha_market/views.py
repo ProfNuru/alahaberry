@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.core import serializers
+from django.utils.safestring import mark_safe
 from dateutil.relativedelta import relativedelta
 from django.db.models import Q
 
@@ -12,7 +13,9 @@ from products.models import Product, Categorie, Order, Damage, ItemRequest, Sold
 from users.models import Profile, AlahaBerrySetting
 from customers.models import Subscriber
 from ads.models import Advertisement
+from .models import Slide
 from .forms import CreateOrderForm, SubscriberForm, RequestForm, SoldItemForm
+from itertools import chain
 
 import random
 import datetime
@@ -30,17 +33,40 @@ def terms_of_service(request):
 
 
 def homepage(request):
-	categories = Categorie.objects.all()
+	if request.GET.get('search-field'):
+		search_term = request.GET.get('search-field').strip()
+		search_keywords = search_term.split(" ")
+
+		list_of_querysets = []
+		for term in search_keywords:
+			list_of_querysets.append(Product.objects.filter(Q(product_name__icontains=term)|Q(product_desc__icontains=term)|Q(tags__icontains=term)))
+		
+		search_results = list(chain(*list_of_querysets))
+		
+		context = {
+			'search_results': search_results,
+			'number_of_results': len(search_results)
+		}
+		print("Search request:", context)
+		return render(request, 'alaha_market/search_results.html', context)
+
 	context = {
-		'categories':categories
+		'slides': Slide.objects.all().order_by('?')[:3]
 	}
+	print("Homepage slides:",context)
 	return render(request, 'alaha_market/homepage.html', context)
 
 
 def initialize_page(request):
+	print("Making AJAX request for products")
 	if request.is_ajax():
 		products = Product.objects.select_related('category').all().order_by('?')
+		# product_hits = ProductHit.objects.all().order_by('-views')[:10]
+
+		# serialized_product_hits = serializers.serialize('json', product_hits)
+
 		serialized_products = serializers.serialize('json', products)
+		print("Sending storage products:", serialized_products)
 		return JsonResponse(serialized_products, safe=False, status=200)
 	return redirect('homepage')
 
@@ -79,7 +105,6 @@ def all_products(request):
 	if int(category_id) > 0 and query:
 		category = Categorie.objects.get(id=int(category_id))
 		products = Product.objects.select_related("seller").filter(Q(product_name__icontains=query)|Q(product_desc__icontains=query)|Q(tags__icontains=query),category=category)
-		print(category)
 	elif query:
 		category = 'None'
 		products = Product.objects.select_related("seller").filter(Q(product_name__icontains=query)|Q(product_desc__icontains=query)|Q(tags__icontains=query))
@@ -125,12 +150,8 @@ def used_products(request):
 	return render(request, 'alaha_market/used_products.html', context)
 
 
-@login_required
 def view_product(request, pk, productname):
 	product = Product.objects.select_related("seller").get(id=pk, product_name=productname)
-	if request.user.groups.filter(name__in=['clerks','admins']).exists():
-		product.views += 1
-		product.save()
 	tags = product.tags
 	
 	context = {
@@ -231,6 +252,8 @@ def submit_order(request):
 	if request.is_ajax():
 		items_ordered = json.loads(request.POST['order_items'])
 
+		print(items_ordered)
+
 		request_data = {
 			'customer_email': request.POST['cust_email'],
 			'customer_phone': request.POST['cust_phone'],
@@ -245,14 +268,14 @@ def submit_order(request):
 		if request_form.is_valid():
 			new_request = request_form.save()
 			for item in items_ordered:
+				item_amount = float(decimal.Decimal(item['qty']) * decimal.Decimal(item['selected_item']['fields']['product_price']))
 				item_ordered = {
-					'item': Product.objects.get(id=item['pk']),
+					'item': Product.objects.get(id=item['selected_item']['pk']),
 					'request': new_request,
 					'qty': item['qty'],
-					'amount': item['amount'],
-					'seller_earning': float(decimal.Decimal(decimal.Decimal(item['amount']) - (decimal.Decimal(item['amount']) * sell_rate.charges_on_sale)))
+					'amount': item_amount,
+					'seller_earning': float(decimal.Decimal(item_amount) - (decimal.Decimal(item_amount) * sell_rate.charges_on_sale))
 				}
-				print(item_ordered)
 
 				sold_item_form = SoldItemForm(item_ordered)
 

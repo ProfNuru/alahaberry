@@ -29,4 +29,3 @@ class Commission(models.Model):
 	def __str__(self):
 		return f'Commission: {self.coupon}'
 
-

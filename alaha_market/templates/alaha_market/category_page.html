@@ -1,61 +1,103 @@
-{% extends 'alaha_market/home_base.html' %}
+{% extends 'alaha_market/base2.html' %}
 {% load static %}
 
+{% block keywords %}
+  {% for product in search_results %}
+    {{ category.category_name }},
+  {% endfor %}
+{% endblock keywords %}
+
+
+{% block title %}
+  {{ category.category_name }} | Alahaberry Marketplace      
+{% endblock title %}
+
+
 {% block CSS %}
-  <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/category_page.css' %}">
+  <!-- Search Results CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/search-results.css' %}"> 
 {% endblock CSS %}
 
 {% block maincontent %}
-  <section id="categoryWrapper">
-      <div class="category-landing-page row">
-          <div class="category-title col-xl-5 col-md-5 col-sm-5 mr-auto">
-              <h1>{{ category.category_name }}</h1>
-              <p>{{ category.category_desc }}</p>
-          </div>
-          <div class="category-banner col-xl-5 col-md-5 col-sm-5 ml-auto">
-              <img loading="lazy" src="{{ category.category_image1.url }}">
-          </div>
+  <div class="landing-grid-container">
+    <div class="categories-links box-shadow">
+      <h6>Categories</h6>
+      {% for category in categories %}
+        <a href="{% url 'category-page' category.id %}">{{category.category_name}}</a>
+      {% endfor %}
+    </div>
+    
+      <div class="carousel-div results-div">
+      <h5 class="results-heading">{{ category.category_name }}</h5>
+      <div class="main-search-results row">
+        <!-- Category items -->
+          {% for product in products %}
+              <a href="{% url 'view-product' product.id product.product_name %}" class="product-thumb col-6 col-sm-4 col-md-4 col-xl-3">
+                <img loading="lazy" src="
+                                {% if product.product_thumbnail %}
+                                  {{ product.product_thumbnail.url }}
+                                {% elif product.product_image1 %}
+                                  {{ product.product_image1.url }}
+                                {% elif product.product_image2 %}
+                                  {{ product.product_image2.url }}
+                                {% elif product.product_image3 %}
+                                  {{ product.product_image3.url }}
+                                {% endif %}
+                                ">
+                <div class="item-description">
+                  <h6>{{product.product_name}}</h6>
+                  <h5>GHS {{product.product_price}}</h5>
+                </div>
+              </a>
+          {% endfor %}
       </div>
 
-      <!-- Category products -->
-      <div id="category-products">
-        <h1>{{ category.category_name }} items</h1>
-        <h6>Latest additions</h6>
-        <div class="line-design"></div>
-        <div class="row product_grid">
-          {% for product in products %}
-            {% if product.product_thumbnail %}
-              <div class="card col-xl-3 col-md-3 col-sm-6">
-                <img loading="lazy" src="{{ product.product_thumbnail.url }}">
-                <div class="card-body">
-                  <h6 class="store_name"><a href="{% url 'shops' product.seller.id product.seller.username %}">
-                    {% if product.seller.profile.business_name != 'NA' %}
-                      {{ product.seller.profile.business_name }}
-                    {% else %}
-                      {{ product.seller.username }}
-                    {% endif %}
-                  </a></h6>
-                  <h4 class="product_name">{{ product.product_name }}</h4>
-                  <a href="{% url 'view-product' product.id product.product_name %}" class="btn btn-danger">BUY NOW</a>
-                </div>
-                {% if product.brand_new %}
-                  <span class="new_tag">
-                    New
-                  </span> 
-                {% else %}
-                  <span class="used_tag">
-                    Used
-                  </span>
-                {% endif %}
-              </div>
-            {% endif %}
-          {% endfor %}
-        </div>
       </div>
-      <!-- ./Category products -->
-  </section>
+     
+    
+    <div class="popular-items">
+      <h2>Top Picks</h2>
+      <div class="popular-items-slider">
+        <div class="glide">
+          <div class="glide__track" data-glide-el="track">
+            <ul class="glide__slides">
+              {% for pick in top_picks %}
+                <li class="glide__slide">
+                  <a href="{% url 'view-product' pick.product.id pick.product.product_name %}" class="product-thumb">
+                    <img loading="lazy" src="
+                      {% if pick.product.product_thumbnail %}
+                        {{ pick.product.product_thumbnail.url }}
+                      {% elif pick.product.product_image1 %}
+                        {{ pick.product.product_image1.url }}
+                      {% elif pick.product.product_image2 %}
+                        {{ pick.product.product_image2.url }}
+                      {% elif pick.product.product_image3 %}
+                        {{ pick.product.product_image3.url }}
+                      {% endif %}
+                    ">
+                    <div class="item-description">
+                      <h6>{{pick.product.product_name}}</h6>
+                      <h5>GHS {{pick.product.product_price}}</h5>
+                    </div>
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+          
+          <div class="glide__arrows" data-glide-el="controls">
+            <button class="glide__arrow glide__arrow--left left-arrow" data-glide-dir="<"><i class="fas fa-chevron-left"></i></button>
+            <button class="glide__arrow glide__arrow--right right-arrow" data-glide-dir=">"><i class="fas fa-chevron-right"></i></button>
+          </div>
+        </div>   
+      </div>
+    </div>
+  </div>
+
+
+
 {% endblock maincontent %}
 
 {% block JS %}
-  <script src="{% static 'alaha_market/js/category_page.js' %}"></script>
+  <script src="{% static 'alaha_market/js/landing-carousel.js' %}"></script>
 {% endblock JS %}

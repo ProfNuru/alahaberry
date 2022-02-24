@@ -13,7 +13,6 @@ def user_signed_up_receiver(request, user, **kwargs):
 	my_group = Group.objects.get(name='sellers') 
 	my_group.user_set.add(user)
 
-
 user_signed_up.connect(user_signed_up_receiver, sender=User)
 
 class AlahaBerrySetting(models.Model):

@@ -1,0 +1,434 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Alahaberry Online Marketplace. BUY and SELL safely and securely">
+    <meta name="keywords" content="{% block keywords %} {% endblock keywords %} Alahaberry, marketplace, online shopping">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <!-- Fontawesome CSS -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/png" href="{% if app_setting.favicon %}{{ app_setting.favicon.url }}{% endif %}">
+
+    <!-- Glide CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/glide.core.min.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/base2.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'alaha_market/css/base2-page-loader.css' %}">
+
+    {% block CSS %}
+
+    {% endblock CSS %}
+    
+    <title>
+      {% block title %}
+      
+      {% endblock title %}
+    </title>
+  </head>
+  <body>
+    <div id="page-loader">
+      <div><i class="fas fa-shopping-cart"></i></div>
+    </div>
+
+    <div id="wrapper">
+      <!-- Title Bar -->
+      <nav class="navbar navbar-light">
+        <div class="container-fluid justify-content-center">
+          <a class="navbar-brand" href="{% url 'homepage' %}">
+            <img src="
+            {% if app_setting.logo %}
+              {{app_setting.logo.url}}
+            {% endif %}
+            " alt="Alahaberry Logo" class="d-inline-block align-text-top">
+            Alahaberry
+          </a>
+        </div>
+      </nav>
+
+      <!-- Search and Cart Container -->
+      <div id="search-cart-container" class="container-fluid">
+        <div class="row row-cols-3 justify-content-between align-items-center">
+          <div class="empty-left-side col-sm-2 col-3 d-none d-sm-flex">
+            {% block productPageCategories %}
+            {% endblock productPageCategories %}
+          </div>
+
+          <!-- Search field -->
+          <div class="search-div col-12 col-sm-6">
+            <form class="search-form box-shadow" action="{% url 'homepage' %}">
+              <input type="text" name="search-field" placeholder="Search Products">
+              <button type="submit">Search</button>
+            </form>
+          </div>
+          <!-- END Search field -->
+
+          <div class="cart-div box-shadow col-sm-4 d-none d-sm-flex">
+            <div class="user-link">
+              {% if user.is_authenticated %}
+                <a href="{% url 'staff-dashboard' %}"><i class="fas fa-user"></i> DASHBOARD</a>
+              {% else %}
+                <a href="{% url 'login' %}"><i class="fas fa-user"></i> Login</a>
+              {% endif %}
+            </div>
+            <div class="cart-btn">
+              <span>Cart <i class="fas fa-shopping-cart"></i></span>
+              <span class="number-of-cart-items">0</span>
+            </div>
+          </div>
+          <div class="empty-right-side d-sm-none d-block col-3"></div>
+        </div>
+      </div>
+
+      <div id="cart-btn" class="box-shadow d-sm-none d-block">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="number-of-cart-items">0</span>
+      </div>
+      <div id="mobile-menu" class="dropdown box-shadow">
+        <a class="btn dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-bars"></i>
+        </a>
+
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+          {% if user.is_authenticated %}
+            <li><a class="dropdown-item" href="{% url 'staff-dashboard' %}"><i class="fas fa-user"></i> DASHBOARD</a></li>
+          {% else %}
+            <li><a class="dropdown-item" href="{% url 'login' %}"><i class="fas fa-user"></i> Login</a></li>
+          {% endif %}
+          
+          <li><hr class="dropdown-divider"></li>
+          <h5>CATEGORIES</h5>
+          {% for category in categories %}
+            <li><a class="dropdown-item" href="{% url 'category-page' category.id %}">{{ category.category_name }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Landing page -->
+      {% block maincontent %}
+        
+      {% endblock maincontent %}
+
+      <!-- Featured Category -->
+      <div class="featured-category">
+        <h2>Featured</h2>
+        <!-- Top slider -->
+        <div class="featured-category-slider-top">
+          <div class="featured-glide-1">
+            <div class="glide__track" data-glide-el="track">
+              <ul class="glide__slides">
+                {% for product in featured_products %}
+                  {% if not forloop.counter|divisibleby:2 %}
+                  <li class="glide__slide">
+                    <a href="{% url 'view-product' product.id product.product_name %}" class="product-thumb">
+                      <img loading="lazy" src="
+                        {% if product.product_thumbnail %}
+                          {{ product.product_thumbnail.url }}
+                        {% elif product.product_image1 %}
+                          {{ product.product_image1.url }}
+                        {% elif product.product_image2 %}
+                          {{ product.product_image2.url }}
+                        {% elif product.product_image3 %}
+                          {{ product.product_image3.url }}
+                        {% endif %}
+                        ">
+                      <div class="item-description">
+                        <h6>{{product.product_name}}</h6>
+                        <h5>GHS {{product.product_price}}</h5>
+                      </div>
+                    </a>
+                  </li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </div>
+            
+            <div class="glide__arrows" data-glide-el="controls">
+              <button class="glide__arrow glide__arrow--left left-arrow" data-glide-dir="<"><i class="fas fa-chevron-left"></i></button>
+              <button class="glide__arrow glide__arrow--right right-arrow" data-glide-dir=">"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom slider -->
+        <div class="featured-category-slider-bottom">
+          <div class="featured-glide-2">
+            <div class="glide__track" data-glide-el="track">
+              <ul class="glide__slides">
+                {% for product in featured_products %}
+                  {% if forloop.counter|divisibleby:2 %}
+                  <li class="glide__slide">
+                    <a href="{% url 'view-product' product.id product.product_name %}" class="product-thumb">
+                      <img loading="lazy" src="
+                        {% if product.product_thumbnail %}
+                          {{ product.product_thumbnail.url }}
+                        {% elif product.product_image1 %}
+                          {{ product.product_image1.url }}
+                        {% elif product.product_image2 %}
+                          {{ product.product_image2.url }}
+                        {% elif product.product_image3 %}
+                          {{ product.product_image3.url }}
+                        {% endif %}
+                        ">
+                      </span>
+                      <div class="item-description">
+                        <h6>{{product.product_name}}</h6>
+                        <h5>GHS {{product.product_price}}</h5>
+                      </div>
+                    </a>
+                  </li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </div>
+            
+            <div class="glide__arrows" data-glide-el="controls">
+              <button class="glide__arrow glide__arrow--left left-arrow" data-glide-dir="<"><i class="fas fa-chevron-left"></i></button>
+              <button class="glide__arrow glide__arrow--right right-arrow" data-glide-dir=">"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advertisement banner -->
+      <div class="ad-banner">
+        <h1>alahaberry.com</h1>
+      </div>
+
+      <!-- Other categories -->
+      <div class="related-category">
+        <h2>NEWEST ADDITIONS</h2>
+        <div class="related-category-slider-top">
+          <div class="related-category-glide-1">
+            <div class="glide__track" data-glide-el="track">
+              <ul class="glide__slides">
+                {% for product in all_products %}
+                  {% if forloop.counter|divisibleby:2 %}
+                  <li class="glide__slide">
+                    <a href="{% url 'view-product' product.id product.product_name %}" class="product-thumb">
+                      <img loading="lazy" src="
+                        {% if product.product_thumbnail %}
+                          {{ product.product_thumbnail.url }}
+                        {% elif product.product_image1 %}
+                          {{ product.product_image1.url }}
+                        {% elif product.product_image2 %}
+                          {{ product.product_image2.url }}
+                        {% elif product.product_image3 %}
+                          {{ product.product_image3.url }}
+                        {% endif %}
+                        ">
+                      <div class="item-description">
+                        <h6>{{product.product_name}}</h6>
+                        <h5>GHS {{product.product_price}}</h5>
+                      </div>
+                    </a>
+                  </li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </div>
+            
+            <div class="glide__arrows" data-glide-el="controls">
+              <button class="glide__arrow glide__arrow--left left-arrow" data-glide-dir="<"><i class="fas fa-chevron-left"></i></button>
+              <button class="glide__arrow glide__arrow--right right-arrow" data-glide-dir=">"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="related-category">
+        <h2>MOST VIEWED</h2>
+        <div class="related-category-slider-bottom">
+          <div class="related-category-glide-2">
+            <div class="glide__track" data-glide-el="track">
+              <ul class="glide__slides">
+                {% for product in all_products %}
+                  {% if not forloop.counter|divisibleby:2 %}
+                  <li class="glide__slide">
+                    <a href="{% url 'view-product' product.id product.product_name %}" class="product-thumb">
+                      <img loading="lazy" src="
+                        {% if product.product_thumbnail %}
+                          {{ product.product_thumbnail.url }}
+                        {% elif product.product_image1 %}
+                          {{ product.product_image1.url }}
+                        {% elif product.product_image2 %}
+                          {{ product.product_image2.url }}
+                        {% elif product.product_image3 %}
+                          {{ product.product_image3.url }}
+                        {% endif %}
+                        ">
+                      </span>
+                      <div class="item-description">
+                        <h6>{{product.product_name}}</h6>
+                        <h5>GHS {{product.product_price}}</h5>
+                      </div>
+                    </a>
+                  </li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </div>
+            
+            <div class="glide__arrows" data-glide-el="controls">
+              <button class="glide__arrow glide__arrow--left left-arrow" data-glide-dir="<"><i class="fas fa-chevron-left"></i></button>
+              <button class="glide__arrow glide__arrow--right right-arrow" data-glide-dir=">"><i class="fas fa-chevron-right"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="container-fluid">
+        <div class="footer row">
+          <div class="alahaberry-subscribe col-12 col-sm-6 col-md-6">
+            <h1>alahaberry</h1>
+            <p>Get the latest updates and deals</p>
+            <p>Subscribe to our Newsletter</p>
+            <form class="subscribe-form"  id="subscribe-form" method="POST" action="{% url 'subscribe' %}">
+              {% csrf_token %}
+              <input type="email" class="form-control" name="subscription_email" id="subscription-email" placeholder="Email">
+              <button id="subscribe-btn" type="submit">Subscribe</button>
+            </form>
+          </div>
+          <div class="payment-methods col-12 col-sm-6 col-md-3">
+            <h5>Payment methods</h5>
+            <div class="container">
+              <div class="row">
+                <div class="col-12 col-sm-6 mt-1">
+                  <img src="{% static 'alaha_market/img/mtn-momo.png' %}" width="100%" height="100%">
+                </div>
+                <div class="col-12 col-sm-6 mt-1">
+                  <img src="{% static 'alaha_market/img/voda-cash.png' %}" width="100%" height="100%">
+                </div>
+                <div class="col-12 col-sm-6 mt-1">
+                  <img src="{% static 'alaha_market/img/mastercard.png' %}" width="100%" height="100%">
+                </div>
+                <div class="col-12 col-sm-6 mt-1">
+                  <img src="{% static 'alaha_market/img/tigo-cash.png' %}" width="100%" height="100%">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="social-media col-12 col-sm-12 col-md-3">
+            <h5>Connect with us</h5>
+            <div class="container">
+              <div class="row">
+                <a href="#" class="col"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="col"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="col"><i class="fab fa-twitter"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="credits">
+          <div>Copyright &copy; 2021 Alahaberry</div>
+          <div>Designed & Developed by <a href="https://www.guildbytes.com/" target="_blank">GuildBytes Tech Solutions</a></div>
+        </div>
+      </footer>
+    </div>
+
+
+    <div id="shopping-cart" class="box-shadow">
+      <div class="cart-header">
+        <div class="alahaberry-logo">
+          <img src="
+            {% if app_setting.logo %}
+              {{app_setting.logo.url}}
+            {% endif %}
+            " alt="Alahaberry Logo">
+        </div>
+        <div class="cart-title">
+          <h2>ALAHABERRY</h2>
+          <h6>YOUR CART</h6>          
+        </div>
+        <div class="close-cart box-shadow"><i class="fas fa-times"></i></div>
+      </div>
+
+      <h5 id="cart-feedback" style="text-align:center; font-style: italic;"></h5>
+
+      <div class="cart-items">
+        
+      </div>
+
+      <div class="cart-footer">
+        <h3>GRAND TOTAL: GHS <span id="total-amount-of-items"></span></h3>
+        <div class="cart-buttons">
+          <a id="checkout-btn" href="#">CHECKOUT</a>
+          <a id="clear-cart-btn" href="#">CLEAR CART</a>
+        </div>
+      </div>
+    </div>
+
+
+<!-- Check out! -->
+<div id="buySingleItemModal" class="modal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Checkout Form</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="buySingleItemMessage">
+    
+        </div>
+        <h6>Enter your details to complete form</h6>
+        <div id="list_of_ordered_items">
+            <!-- Media object -->
+            
+        </div>
+        <div class="item-totals-div">
+          <h4>Grand Total</h4>
+          <h1>GHS <span>99.99</span></h1>
+        </div>
+      <form id="order_form" action="{% url 'submit-order' %}" method="POST">
+          {% csrf_token %}
+              <div class="form-group">
+                  <label for="customer_email">Email address</label>
+                  <input type="email" class="form-control" id="customer_email" aria-describedby="emailHelp">
+                  <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+              </div>
+              <div class="form-group">
+                  <label for="customer_phone">Phone Number</label>
+                  <input type="text" class="form-control" id="customer_phone" aria-describedby="phoneHelp">
+                  <small id="phoneHelp" class="form-text text-muted">We'll never share your phone number with anyone else.</small>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button id="place-order-btn" type="button" class="btn btn-primary">Submit Order</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+    <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script> -->
+
+    <!-- jQuery -->
+    <script src="{% static 'alaha_market/js/jquery.js' %}"></script>
+
+    <!-- Glide JS -->
+    <!-- <script src="glide.min.js"></script> -->
+    <script src="{% static 'alaha_market/js/glide.min.js' %}"></script>
+
+    <!-- Custom JS -->
+    <script src="{% static 'alaha_market/js/base2-load-data.js' %}"></script>
+    <script src="{% static 'alaha_market/js/base2.js' %}"></script>
+    {% block JS %}
+
+    {% endblock JS %}
+  </body>
+</html>

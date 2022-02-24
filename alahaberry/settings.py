@@ -74,13 +74,32 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Keep our policy as strict as possible
+# CSP_DEFAULT_SRC = ("'none'",)
+# CSP_STYLE_SRC = ("'self'", 'fonts.googleapis.com','cdn.jsdelivr.net','use.fontawesome.com',)
+# CSP_SCRIPT_SRC = ("'self'",'cdn.jsdelivr.net')
+# CSP_FONT_SRC = ("'self'", 'fonts.gstatic.com')
+# CSP_IMG_SRC = ("'self'",)
+
+# Security Headers
+# CSRF_COOKIE_SECURE = True
+# CSRF_COOKIE_SAMESITE = 'Strict'
+# SESSION_COOKIE_SECURE = True
+# SECURE_BROWSER_XSS_FILTER = True
+# SECURE_CONTENT_TYPE_NOSNIFF = True
+# SECURE_SSL_REDIRECT = True
+# X_FRAME_OPTIONS = 'DENY'
+# SECURE_HSTS_SECONDS = 300  # 15768000 (6 months)
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
+
 ROOT_URLCONF = 'alahaberry.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR, 
-'templates', 'affiliations','alaha_market', 'products', 'subscription_packages','users')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), os.path.join(BASE_DIR,
+                                                                   'templates', 'affiliations', 'alaha_market', 'products', 'subscription_packages', 'users')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -108,18 +127,19 @@ WSGI_APPLICATION = 'alahaberry.wsgi.application'
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-    'default':{
+    'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
     # 'default': {
-    #     'ENGINE': 'django.db.backends.postgresql',
-    #     'NAME': 'buhrgxkl',
-    #     'USER': 'buhrgxkl',
-    #     'PASSWORD': 'WuT3DLb7AObQRPMWeOHY-Z5JHEs7XPVO',
-    #     'HOST': 'rogue.db.elephantsql.com',
-    #     'PORT': '5432'
-    # }
+    #      'ENGINE': 'django.db.backends.postgresql_psycopg2',
+    #      'NAME': config["DATABASE"],
+    #      'USER': config["DB_USER"],
+    #      'PASSWORD': config["DB_PASS"],
+    #      'HOST': config["DB_HOST"],
+    #      'PORT': config["DB_PORT"]
+    #  }
+
 }
 
 
@@ -185,7 +205,7 @@ SOCIALACCOUNT_PROVIDERS = {
             "secret": "50I5gg2O2H9ZiJWiBiotYNVa",
             "key": ""
         },
-        'SCOPE':[
+        'SCOPE': [
             'profile',
             'email',
         ],
@@ -194,5 +214,3 @@ SOCIALACCOUNT_PROVIDERS = {
         }
     }
 }
-
-
