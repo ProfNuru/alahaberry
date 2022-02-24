@@ -11,6 +11,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
+import json
+with open('config.json', 'r') as f:
+    config = json.loads(f.read())
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -195,8 +198,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'alahabery@gmail.com'
-EMAIL_HOST_PASSWORD = 'ascsxfeeffxtbgsz'
+EMAIL_HOST_USER = config["EMAIL"]
+EMAIL_HOST_PASSWORD = config["PWD"]
 
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
